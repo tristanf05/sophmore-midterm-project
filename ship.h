@@ -7,12 +7,13 @@ class ship {
 
 public:
 	ship(string name, int max_Health, int max_Energy, int evasiveness, int energy_Regen);
-
-	void status_Effects();
-	void apply_Overheat_Status(int percent);
-	void apply_Defense_Down_Status(int percent);
-	void apply_Stun_Status(int percent);
-	void apply_Corrosion_Status(int percent);
+	//void print_Current_Statuses();
+	void reduce_Status_Effects();
+	void apply_Overheat_Status(int percent, int num_Turns);
+	void apply_Weakened_Status(int percent, int num_Turns);
+	void apply_Stun_Status(int percent, int num_Turns);
+	void apply_Corrosion_Status(int percent, int num_Turns);
+	void apply_Disrupted_Status(int percent, int num_Turns);
 
 	void set_Name(string name);
 	void set_Evasiveness(int evassiveness);
@@ -22,10 +23,11 @@ public:
 	void set_Current_Health(int current_Health);
 	void set_Energy_Regen(int energy_Regen);
 
-	void set_Overheat_Status();
-	void set_Stun_Status();
-	void set_Weaken_Status();
-	void set_Corrosion_Status();
+	void set_Overheat_Status(int num_Turns);
+	void set_Stun_Status(int num_Turns);
+	void set_Weaken_Status(int num_Turns);
+	void set_Corrosion_Status(int num_Turns);
+	void set_Disrupted_Status(int num_Turns);
 
 	void set_Hull_Level(int level);
 	void set_Engines_Level(int level);
@@ -44,10 +46,12 @@ public:
 	bool get_Evaded();
 	void set_Evaded(bool evaded);
 
-	bool get_Overheat_Status();
-	bool get_Stun_Status();
-	bool get_Weaken_Status();
-	bool get_Corrode_Status();
+	int get_Overheat_Status();
+	int get_Stun_Status();
+	int get_Weaken_Status();
+	int get_Corrode_Status();
+	int get_Disrupted_Status();
+	bool check_Statuses();
 
 	int get_Hull_Level();
 	int get_Engines_Level();
@@ -58,23 +62,19 @@ public:
 
 	void evade_Action(int accuracy);
 
-	
-
 	int upgrade_Options(int player_Inventory[]);
 	int heal_Options(int player_Inventory[]);
 
 	void print_Detailed_Stats();
-	void print_Stats();
+	
 	
 private:
 
-
-	bool weaken_Effect = false;
-	bool stun_Effect = false;
-	bool overheat_Effect = false;
-	bool corrosion_Effect = false;
+	//corrosion, stun, weaken, overheat, and disrupted
+	int status_Effects[5] = {0, 0, 0, 0, 0};
+	
 	//stats
-	string name;
+	string name ;
 	int max_Health;
 	int current_Health;
 	int max_Energy;

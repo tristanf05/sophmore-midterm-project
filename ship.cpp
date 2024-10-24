@@ -53,17 +53,20 @@ void ship::set_Evaded(bool evaded) {
 	this->evaded = evaded;
 }
 
-void ship::set_Weaken_Status() {
-	weaken_Effect = true;
+void ship::set_Weaken_Status(int num_Turns) {
+	status_Effects[2] = num_Turns;
 }
-void ship::set_Overheat_Status() {
-	overheat_Effect = true;
+void ship::set_Overheat_Status(int num_Turns) {
+	status_Effects[3] = num_Turns;
 }
-void ship::set_Stun_Status() {
-	stun_Effect = true;
+void ship::set_Stun_Status(int num_Turns) {
+	status_Effects[1] = num_Turns;
 }
-void ship::set_Corrosion_Status() {
-	corrosion_Effect = true;
+void ship::set_Corrosion_Status(int num_Turns) {
+	status_Effects[0] = num_Turns;
+}
+void ship::set_Disrupted_Status(int num_Turns) {
+	status_Effects[4] = num_Turns;
 }
 
 void ship::set_Hull_Level(int level) {
@@ -117,17 +120,20 @@ string ship::get_Name() {
 	return name;
 }
 
-bool ship::get_Weaken_Status() {
-	return weaken_Effect;
+int ship::get_Weaken_Status() {
+	return status_Effects[2];
 }
-bool ship::get_Overheat_Status() {
-	return overheat_Effect;
+int ship::get_Overheat_Status() {
+	return status_Effects[3];
 }
-bool ship::get_Stun_Status() {
-	return stun_Effect;
+int ship::get_Stun_Status() {
+	return status_Effects[1];
 }
-bool ship::get_Corrode_Status() {
-	return corrosion_Effect;
+int ship::get_Corrode_Status() {
+	return status_Effects[0];
+}
+int ship::get_Disrupted_Status() {
+	return status_Effects[4];
 }
 
 bool ship::get_Evaded() {

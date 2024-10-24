@@ -8,6 +8,16 @@
 using namespace std;
 std::random_device rd;
 std::mt19937 gen(rd());
+bool player_Corrosion;
+bool player_Weakened;
+bool player_Stunned;
+bool player_Overheated;
+bool player_Disrupted;
+bool enemy_Corrosion;
+bool enemy_Weakened;
+bool enemy_Stunned;
+bool enemy_Overheated;
+bool enemy_Disrupted;
 
 using namespace std;
 //miscellaneous stuff
@@ -64,16 +74,25 @@ void win_Screen() {
 	}
 	press_X_To_Continue_And_Clear();
 }
+bool return_Player_Char() {
+	char valid_Player_Choice;
+	string player_Choice;
+	getline(cin, player_Choice);
+	stringstream ss(player_Choice);
+	ss >> valid_Player_Choice;
+	if (ss.fail()) {
+		return  false;
+	}
+	else {
+		return true;
+	}
+}
 int return_Player_Choice() {
 	int valid_Player_Choice;
 	string player_Choice;
 	getline(cin, player_Choice);
-
-	
 	stringstream ss(player_Choice);
 	ss >> valid_Player_Choice;
-
-	
 	if (ss.fail()) {
 		return -5;
 	}
@@ -81,6 +100,7 @@ int return_Player_Choice() {
 		return valid_Player_Choice;
 	}
 }
+
 
 //item drops
 void print_Dropped_Items(int items[]) {
@@ -130,7 +150,6 @@ void drop_Items(int level, int players_Inventory[]) {
 	}
 	print_Dropped_Items(dropped_Items);
 }
-
 void print_Inventory(int player_Inventory[]) {
 	cout << endl;
 	cout << "Your inventory: " << endl;
@@ -153,6 +172,255 @@ void print_Inventory(int player_Inventory[]) {
 }
 
 //combat
+void print_Num_Spaces(int num_Spaces) {
+	for (int i = 0; i < num_Spaces; i++) {
+		cout << " ";
+	}
+}
+//statuses
+bool ship::check_Statuses() {
+	for (int i = 0; i < 5; i++) {
+		if (status_Effects[i] > 0) {
+			return true;
+		}
+	}
+	return false;
+}
+void reset_Status_Displays() {
+	player_Corrosion = false;
+	player_Weakened = false;
+	player_Stunned = false;
+	player_Overheated = false;
+	enemy_Corrosion = false;
+	enemy_Weakened = false;
+	enemy_Stunned = false;
+	enemy_Overheated = false;
+}
+void print_Current_Statuses(ship players_Ship, ship enemy_Ship, int line) {
+	
+
+	if (line == 1) {
+		if (!players_Ship.check_Statuses()) {
+			cout << "NONE";
+			print_Num_Spaces(34);
+		}
+		else if (players_Ship.get_Corrode_Status() > 0) {
+			cout << "Corrosion";
+			print_Num_Spaces(29);
+			player_Corrosion = true;
+		}
+		else if (players_Ship.get_Weaken_Status() > 0) {
+			cout << "Weakened";
+			print_Num_Spaces(30);
+			player_Weakened = true;
+		}
+		else if (players_Ship.get_Stun_Status() > 0) {
+			cout << "Stunned";
+			print_Num_Spaces(31);
+			player_Stunned = true;
+		}
+		else if (players_Ship.get_Overheat_Status() > 0) {
+			cout << "Overheated weapon";
+			print_Num_Spaces(21);
+			player_Overheated = true;
+		}
+		else if (players_Ship.get_Disrupted_Status() > 0) {
+			cout << "Disrupted";
+			print_Num_Spaces(29);
+			player_Disrupted = true;
+		}
+
+
+		if (!enemy_Ship.check_Statuses()) {
+			cout << "NONE" << endl;
+		}
+		else if (enemy_Ship.get_Corrode_Status() > 0) {
+			cout << "Corrosion" << endl;
+			enemy_Corrosion = true;
+		}
+		else if (enemy_Ship.get_Weaken_Status() > 0) {
+			cout << "Weakened" << endl;
+			enemy_Weakened = true;
+		}
+		else if (enemy_Ship.get_Stun_Status() > 0) {
+			cout << "Stunned" << endl;
+			enemy_Stunned = true;
+		}
+		else if (enemy_Ship.get_Overheat_Status() > 0) {
+			cout << "Overheated weapon" << endl;
+			enemy_Overheated = true;
+
+		}
+		else if (enemy_Ship.get_Disrupted_Status() > 0) {
+			cout << "Disrupted" << endl;
+			enemy_Disrupted = true;
+		}
+	}
+	else if (line == 2) {
+		if (players_Ship.get_Weaken_Status() > 0 && !player_Weakened) {
+			cout << "Weakened";
+			print_Num_Spaces(30);
+			player_Weakened = true;
+		}
+		else if (players_Ship.get_Stun_Status() > 0 && !player_Stunned) {
+			cout << "Stunned";
+			print_Num_Spaces(31);
+			player_Stunned = true;
+		}
+		else if (players_Ship.get_Overheat_Status() > 0 && !player_Overheated) {
+			cout << "Overheated weapon";
+			print_Num_Spaces(21);
+			player_Overheated = true;
+		}
+		else if (players_Ship.get_Disrupted_Status() > 0 && !player_Disrupted) {
+			cout << "Disrupted";
+			print_Num_Spaces(29);
+			player_Disrupted = true;
+		}
+
+		if (enemy_Ship.get_Weaken_Status() > 0 && !enemy_Weakened) {
+			cout << "Weakened" << endl;
+			enemy_Weakened = true;
+		}
+		else if (enemy_Ship.get_Stun_Status() > 0 && !enemy_Stunned) {
+			cout << "Stunned" << endl;
+			enemy_Stunned = true;
+		}
+		else if (enemy_Ship.get_Overheat_Status() > 0 && !enemy_Overheated) {
+			cout << "Overheated weapon" << endl;
+			enemy_Overheated = true;
+		}
+		else if (enemy_Ship.get_Disrupted_Status() > 0 && !enemy_Disrupted) {
+			cout << "Disrupted" << endl;
+			enemy_Disrupted = true;
+		}
+		else {
+			cout << endl;
+		}
+
+
+	}
+	else if (line == 3) {
+		if (players_Ship.get_Stun_Status() > 0 && !player_Stunned) {
+			cout << "Stunned";
+			print_Num_Spaces(32);
+			player_Stunned = true;
+		}
+		else if (players_Ship.get_Overheat_Status() > 0 && !player_Overheated) {
+			cout << "Overheated weapon";
+			print_Num_Spaces(21);
+			player_Overheated = true;
+		}
+		else if (players_Ship.get_Disrupted_Status() > 0 && !player_Disrupted) {
+			cout << "Disrupted";
+			print_Num_Spaces(29);
+			player_Disrupted = true;
+		}
+
+		if (enemy_Ship.get_Stun_Status() > 0 && !enemy_Stunned) {
+			cout << "Stunned" << endl;
+			enemy_Stunned = true;
+		}
+		else if (enemy_Ship.get_Overheat_Status() > 0 && !enemy_Overheated) {
+			cout << "Overheated weapon" << endl;
+			enemy_Overheated = true;
+		}
+		else {
+			cout << endl;
+		}
+		
+	}
+	else if (line == 4) {
+		if (players_Ship.get_Overheat_Status() > 0 && !player_Overheated) {
+			cout << "Overheated weapon";
+			print_Num_Spaces(21);
+			player_Overheated = true;
+		}
+		else if (players_Ship.get_Disrupted_Status() > 0 && !player_Disrupted) {
+			cout << "Disrupted";
+			print_Num_Spaces(29);
+			player_Disrupted = true;
+		}
+		if (enemy_Ship.get_Overheat_Status() > 0 && !enemy_Overheated) {
+			cout << "Overheated weapon" << endl;
+			enemy_Overheated = true;
+		}
+		else if (enemy_Ship.get_Disrupted_Status() > 0 && !enemy_Disrupted) {
+			cout << "Disrupted" << endl;
+			enemy_Disrupted = true;
+		}
+		else {
+			cout << endl;
+		}
+	}
+	else if (line == 5) {
+		if (players_Ship.get_Disrupted_Status() > 0 && !player_Disrupted) {
+			cout << "Disrupted";
+			print_Num_Spaces(29);
+			player_Disrupted = true;
+		}
+		if (enemy_Ship.get_Disrupted_Status() > 0 && !enemy_Disrupted) {
+			cout << "Disrupted" << endl;
+			enemy_Disrupted = true;
+		}
+		else {
+			cout << endl;
+		}
+	}
+	
+
+}
+
+void ship::reduce_Status_Effects() {
+
+
+}
+void ship::apply_Overheat_Status(int percent, int num_Turns) {
+	int chance = random_Number(1, 100);
+	if (chance <= percent) {
+		set_Overheat_Status(num_Turns);
+	}
+}
+void ship::apply_Weakened_Status(int percent, int num_Turns) {
+	int chance = random_Number(1, 100);
+	if (chance <= percent) {
+		set_Weaken_Status(num_Turns);
+	}
+}
+void ship::apply_Stun_Status(int percent, int num_Turns) {
+	int chance = random_Number(1, 100);
+	if (chance <= percent) {
+		set_Stun_Status(num_Turns);
+	}
+}
+void ship::apply_Corrosion_Status(int percent, int num_Turns) {
+	int chance = random_Number(1, 100);
+	if (chance <= percent) {
+		set_Corrosion_Status(num_Turns);
+	}
+}
+void ship::apply_Disrupted_Status(int percent, int num_Turns) {
+	int chance = random_Number(1, 100);
+	if (chance <= percent) {
+		set_Disrupted_Status(num_Turns);
+	}
+}
+void status_Codex() {
+	system("cls");
+	cout << "STATUS CODEX" << endl;
+	cout << "----------------------" << endl;
+	cout << "Corrosion: deals damage over time, dealing more each turn" << endl;
+	cout << "Weaken: decreases the target's defense by 50% for 1 turn" << endl;
+	cout << "Stun: disables the target's ability to act for a turn, 70% chance it goes away the subsequent turn" << endl;
+	cout << "Overheat: disables the overheated artillery for 1-2 turns" << endl;
+	cout << "Disrupted: disables energy regeneration for 3 - 5 turns" << endl;
+	cout << "----------------------" << endl;
+	cout << "Enter any number to return to combat: " << endl;
+	int player_Choice = return_Player_Choice();
+
+}
+
+
 void ship::print_Detailed_Stats() {
 	cout << endl;
 	cout << "The " << get_Name() << "'s stats" << endl;
@@ -162,16 +430,40 @@ void ship::print_Detailed_Stats() {
 	cout << "Energy regeneration: 5% to " << get_Energy_Regen() << "%" << endl << endl;
 	
 }
-void ship::print_Stats() {
-	cout << "Health: " << get_Current_Health() << "/" << get_Max_Health() << endl;
-	cout << "Energy: " << get_Current_Energy() << "/" << get_Max_Energy() << endl;
-	cout << "--------------------" << endl;
+
+void print_Stats(ship players_Ship, ship enemy_Ship) {
+	reset_Status_Displays();
+	int player_Name_Length = 30 - players_Ship.get_Name().length();
+	int enemy_Name_Length = 34 - enemy_Ship.get_Name().length();
+	//int enemy_Name_Length = 30 - enemy_Ship.get_Name().length();
+	cout << "The " << players_Ship.get_Name() << "'s stats";
+	print_Num_Spaces(player_Name_Length);
+	cout << "STATUS EFFECTS:\t\t\t" << "ENEMY STATUS EFFECTS:" << endl;
+	cout << "Health: " << players_Ship.get_Current_Health() << "/" << players_Ship.get_Max_Health();
+	print_Num_Spaces(29);
+	cout << "---------------------\t\t\t---------------------" <<  endl;
+	cout << "Energy: " << players_Ship.get_Current_Energy() << "/" << players_Ship.get_Max_Energy();
+	print_Num_Spaces(29);
+	print_Current_Statuses(players_Ship, enemy_Ship, 1);
+	cout << "--------------------";
+	print_Num_Spaces(22);
+	print_Current_Statuses(players_Ship, enemy_Ship, 2);
+	cout << enemy_Ship.get_Name() << "'s stats";
+	print_Num_Spaces(enemy_Name_Length);
+	print_Current_Statuses(players_Ship, enemy_Ship, 3);
+	cout << "Health: " << enemy_Ship.get_Current_Health() << "/" << enemy_Ship.get_Max_Health();
+	print_Num_Spaces(29);
+	print_Current_Statuses(players_Ship, enemy_Ship, 4);
+	cout << "Energy: " << enemy_Ship.get_Current_Energy() << "/" << enemy_Ship.get_Max_Energy();
+	print_Num_Spaces(29);
+	print_Current_Statuses(players_Ship, enemy_Ship, 5);
+	cout << "--------------------                      ---------------------                 ---------------------" << endl;
+	//       ------------------------------------------------------------------------------------------------------
 }
 
 //dodging
 bool evade(int percent) {
 	int evade = random_Number(1, 100);
-
 	if (evade >= percent) {
 		return true;
 	}
@@ -179,7 +471,6 @@ bool evade(int percent) {
 		return false;
 	}
 }
-
 void ship::evade_Action(int accuracy) {
 	int max_Energy_Regen = get_Energy_Regen();
 	double energy_Regen = random_Number(5, max_Energy_Regen);
@@ -214,6 +505,7 @@ void artillery::print_Combat_Info(int num) {
 }
 void print_Player_Options(ship players_Ship, std::vector<artillery> players_Artillery) {
 	cout << "Enter a number to fire the corresponding artillery, or press 0 to regain some energy and increase your chances to dodge an attack" << endl;
+	cout << "Press " << players_Artillery.size() + 1 << " to bring up the status codex" << endl;
 	for (int i = 0; i < players_Artillery.size(); i++){
 		cout << "--------------------   ";
 	}
@@ -274,25 +566,21 @@ void print_Player_Options(ship players_Ship, std::vector<artillery> players_Arti
 int read_User_Input(ship& players_Ship, vector<artillery>& players_Artillery) {
 	bool valid = false;
 	int player_Choice = return_Player_Choice();
-	
 	while (!valid) {
-		if (player_Choice == 0) {
+		
+		if (player_Choice == 0 || player_Choice == players_Artillery.size() + 1) {
 			valid = true;
 			return player_Choice - 1;
 		}
-		if (player_Choice > 0 && player_Choice <= players_Artillery.size()) {
+		else if (player_Choice > 0 && player_Choice <= players_Artillery.size()) {
 			if (players_Ship.get_Current_Energy() >= players_Artillery[player_Choice-1].get_Energy_Cost()) {
 				if (players_Artillery[player_Choice-1].get_Current_Uses() > 0) {
 					valid = true;
 					int uses_Remaining = players_Artillery [player_Choice- 1] .get_Current_Uses() - 1;
 					players_Artillery[player_Choice -1].set_Current_Uses(uses_Remaining);
-
 					int energy_Remaining = players_Ship.get_Current_Energy() - players_Artillery[player_Choice -1].get_Energy_Cost();
 					players_Ship.set_Current_Energy(energy_Remaining);
-
 					return player_Choice - 1;
-
-
 				}
 				else {
 					cout << "You do not have enough ammo" << endl;
@@ -308,7 +596,6 @@ int read_User_Input(ship& players_Ship, vector<artillery>& players_Artillery) {
 			cout << "Invalid, please try again" << endl;
 			player_Choice = return_Player_Choice();
 		}
-		
 	}
 }
 void user_Action(int player_Choice, ship& players_Ship, vector<artillery>& players_Artillery, ship& enemy_Ship) {
@@ -329,7 +616,7 @@ int read_Enemy_Input(ship& enemy_Ship, vector<artillery>& enemys_Artillery) {
 	while (!valid) {
 		
 		enemy_Choice = random_Number(0, (enemys_Artillery.size() - 1));
-
+		
 		
 		if (enemys_Artillery[enemy_Choice].get_Energy_Cost() <= enemy_Ship.get_Current_Energy() && enemys_Artillery[enemy_Choice].get_Current_Uses() > 0) {
 			
@@ -382,47 +669,32 @@ void enemy_Action(int enemy_Choice, ship& players_Ship, ship& enemy_Ship, vector
 	}
 }
 
-//status effects
-void ship::status_Effects() {
 
 
-}
-void ship::apply_Overheat_Status(int percent) {
-	int chance = random_Number(1, 100);
-	if (chance <= percent/2) {
-		set_Overheat_Status();
-	}
-}
-void ship::apply_Defense_Down_Status(int percent) {
-	int chance = random_Number(1, 100);
-	if (chance <= percent) {
-		set_Weaken_Status();
-	}
-}
-void ship::apply_Stun_Status( int percent) {
-	int chance = random_Number(1, 100);
-	if (chance <= percent) {
-		set_Stun_Status();
-	}
-}
-void ship::apply_Corrosion_Status(int percent) {
-	int chance = random_Number(1, 100);
-	if (chance <= percent) {
-		set_Corrosion_Status();
-	}
-}
+
+
 
 int combat(ship& players_Ship, vector<artillery>& players_Artillery, int players_Inventory[], int enemy_Level, ship& enemy_Ship, vector<artillery>& enemys_Artillery) {
 	int max_Energy = players_Ship.get_Max_Energy();
 	players_Ship.set_Current_Energy(max_Energy);
 	while (enemy_Ship.get_Current_Health() > 0) {
 		if (players_Ship.get_Current_Health() > 0) {
-			cout << "The " << players_Ship.get_Name() << "'s stats" << endl;
-			players_Ship.print_Stats();
-			cout << enemy_Ship.get_Name() << "'s stats" << endl;
-			enemy_Ship.print_Stats();
-			print_Player_Options(players_Ship, players_Artillery);
-			int player_Choice = read_User_Input(players_Ship, players_Artillery);
+			bool player_Choice_Loop = false;
+			int player_Choice;
+			while (!player_Choice_Loop) {
+				print_Stats(players_Ship, enemy_Ship);
+				print_Player_Options(players_Ship, players_Artillery);
+				player_Choice = read_User_Input(players_Ship, players_Artillery);
+				if (player_Choice == players_Artillery.size()) {
+					status_Codex();
+					system("cls");
+				}
+				else {
+					player_Choice_Loop = true;
+				}
+
+			}
+			
 			int enemy_Choice = read_Enemy_Input(enemy_Ship, enemys_Artillery);
 			int players_Artillery_Accuracy = 0;
 			int enemys_Artillery_Accuracy  = 0;
@@ -435,7 +707,6 @@ int combat(ship& players_Ship, vector<artillery>& players_Artillery, int players
 			if (enemy_Choice == -1 || player_Choice == -1) {
 				bool first_Evade = false;
 				if (player_Choice == -1) {
-					//user evade function
 					players_Ship.evade_Action(enemys_Artillery_Accuracy);
 					press_X_To_Continue();
 					first_Evade;
@@ -494,21 +765,11 @@ void add_Artillery1(vector<artillery>& artillery_For_Purchase) {
 void add_Artillery2(vector<artillery>& artillery_For_Purchase) {
 	artillery_For_Purchase.push_back(artillery("voidpeircer", 15, 85, 95, 12, 10, false, false, true, false, 2, "50% to weaken"));
 }
-
 void add_Artillery3(vector<artillery>& artillery_For_Purchase) {
 	artillery_For_Purchase.push_back(artillery("star breaker", 65, 75, 15, 7, 35, false, false, false, true, 3, "25% to overheat"));
 }
 
-int generate_Price(int num, int multiplier, int minus) {
-	num = minus - num;
-	int old_Num = num / 2;
-	num *= multiplier;
-	num += old_Num;
 
-	
-
-	return num;
-}
 
 void display_Price(int price[]) {
 	cout << " \tPRICE: ";
@@ -541,13 +802,22 @@ void display_Price(int price[]) {
 		}
 	}
 }
-
 void wipe_Price(int price[]) {
 	for (int i = 0; i < 4; i++) {
 		price[i] = 0;
 	}
 }
 
+int generate_Price(int num, int multiplier, int minus) {
+	num = minus - num;
+	int old_Num = num / 2;
+	num *= multiplier;
+	num += old_Num;
+
+
+
+	return num;
+}
 int* generate_Upgade_Price(int num, int price[]) {
 	//num = 4 - num;
 	for (int i = 0; i < 4 && i < num + 1; i++) {
@@ -559,7 +829,6 @@ int* generate_Upgade_Price(int num, int price[]) {
 	}
 	return price;
 }
-
 void purchase(int price[], int player_Inventory[]) {
 	for (int i = 0; i < 4; i++) {
 		if (price[i] > 0) {
@@ -567,7 +836,6 @@ void purchase(int price[], int player_Inventory[]) {
 		}
 	}
 }
-
 bool validate_Purchase(int price[], int player_Inventory[]) {
 	for (int i = 0; i < 4; i++){
 		if (price[i] > player_Inventory[i]) {
@@ -606,8 +874,6 @@ int depot_Options() {
 	}
 	return player_Choice;
 }
-
-
 
 int ship::upgrade_Options(int player_Inventory[]) {
 	
@@ -676,7 +942,7 @@ int ship::upgrade_Options(int player_Inventory[]) {
 		player_Choice = return_Player_Choice();
 		int* all_Upgrade_Levels = get_All_Levels();
 		price = generate_Upgade_Price(all_Upgrade_Levels[player_Choice - 1], price);
-		if (player_Choice <= 5 && player_Choice >= 0) {
+		if (player_Choice <= 5 && player_Choice > 0) {
 			if (all_Upgrade_Levels[player_Choice - 1] < 5) {
 
 				if (validate_Purchase(price, player_Inventory)) {
@@ -694,13 +960,16 @@ int ship::upgrade_Options(int player_Inventory[]) {
 			}
 			
 		}
+		else if (player_Choice == 0) {
+			valid = true;
+			return player_Choice;
+		}
 		else {
 			cout << "Invalid input, please try again" << endl;
 		}
 	}
 
 }
-
 int artillery_Options( vector<artillery>& players_Artillery, vector<artillery>& artillery_For_Purchase, int player_Inventory[]) {
 	system("cls");
 	cout << "Here are the artillery to purchase, or enter 0 to go back" << endl;
@@ -1017,9 +1286,22 @@ int starship_Depot(ship players_Ship, vector<artillery>& players_Artillery, vect
 	return 0;
 }
 
+string pick_Name() {
+	cout << "You are the captain of your very own spaceship, you are going to"
+		<< " have to navigate outer space while defending yourself against hostile"
+		<< " space pirates.You start out with basic artillery, but as you progress"
+		<< " you will be able to acquire new types of guns. You will also be able to"
+		<< " upgrade your ship with the materials you gain while fighting the enemies "
+		<< "you find in space. " << endl << endl;
+	string user_Name;
+	cout << "What do you want to name your vessel: " << endl;
+	getline(cin, user_Name);
+	system("cls");
+	return user_Name;
+}
+
 int main() {
-	int players_Inventory[4] = { 32, 32, 32, 10 };
-	
+	int players_Inventory[4] = {32, 32, 32, 10};
 	vector<artillery> artillery_For_Purchase = {
 	artillery("graviton corroder", 30, 60, 35, 10, 20, true, false, false, false, 0, "None") };
 	/*
@@ -1027,33 +1309,23 @@ int main() {
 	// name, damage, accuracy, attack_Speed, max_Uses, energy_Cost, is_EMP, is_Pulse_Disruptor, is_Plasma_Overload);
 	*/
 	
-	cout << "You are the captain of your very own spaceship, you are going to"
-	<< " have to navigate outer space while defending yourself against hostile" 
-	<< " space pirates.You start out with basic artillery, but as you progress" 
-	<< " you will be able to acquire new types of guns. You will also be able to"
-	<< " upgrade your ship with the materials you gain while fighting the enemies "
-	<< "you find in space. " << endl << endl;
-	string user_Name;
-	cout << "What do you want to name your vessel: " << endl;
-	getline(cin, user_Name);
-	system("cls");
-
+	string user_Name = pick_Name();
 	ship players_Ship(user_Name, 50, 50, 10, 10);
 	//name , health, energy, evasiveness, energy regen
 	vector<artillery> players_Artillery = {
 	artillery( "basic artillery", 15, 95, 50, 30, 5, false, false, false, false, 0, "None") };
 	// name, damage, accuracy, attack_Speed, max_Uses, energy_Cost, is_EMP, is_Pulse_Disruptor, is_Plasma_Overload);
-
-		//fight 1, level 1 
+	
+	
+	//fight 1, level 1 
 	ship enemy_Ship1("Space pirate ship", 35, 20, 15, 25);
 	vector<artillery> enemys_Artillery = {
 	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, 0, " "),
 	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, 0, " ") };
-	//combat(players_Ship, players_Artillery, players_Inventory, 1, enemy_Ship1, enemys_Artillery);
+	combat(players_Ship, players_Artillery, players_Inventory, 1, enemy_Ship1, enemys_Artillery);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
 	
-
 	//fight2, level 1
 	ship enemy_Ship2("Astro bandit", 35, 20, 15, 25);
 	enemys_Artillery = {
