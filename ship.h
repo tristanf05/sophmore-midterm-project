@@ -6,6 +6,7 @@ class ship {
 	
 
 public:
+	//name , health, energy, evasiveness, energy regen
 	ship(string name, int max_Health, int max_Energy, int evasiveness, int energy_Regen);
 	//void print_Current_Statuses();
 	
@@ -93,7 +94,7 @@ public:
 
 	void print_Combat_Info(int num);
 	
-
+	// name, damage, accuracy, attack speed, max uses, energy cost, corrode, stun, weaken, overheat, disrupt, status chance, ammo quality, ability name
 	artillery(string name, int damage, int accuracy, int attack_Speed, int max_Uses, int energy_Cost, bool can_Corrode, bool can_Stun, bool can_Weaken, bool can_Overheat, bool can_Disrupt, int percent, int ammo_Quality, string ability_Name);
 
 	string get_Ability_Name();

@@ -5,6 +5,9 @@ using namespace std;
 #include <sstream>
 #include <cstring>
 
+#include <chrono>
+#include <thread>
+
 #include <cctype>
 #include <algorithm>
 #include "ship.h"
@@ -108,8 +111,8 @@ int return_Player_Choice() {
 
 
 //item drops
-void print_Dropped_Items(int items[]) {
-	cout << "Dropped items: " << endl;
+void print_Dropped_Items(string text, int items[]) {
+	cout << text << endl;
 	if (items[0] > 0) {
 		cout << "Stellar Debris (" << items[0] << ")" << endl;
 	}
@@ -153,27 +156,34 @@ void drop_Items(int level, int players_Inventory[]) {
 	for (int i = 0; i < 4; i++) {
 		players_Inventory[i] += dropped_Items[i];
 	}
-	print_Dropped_Items(dropped_Items);
+	print_Dropped_Items("Dropped items:", dropped_Items);
 }
-void print_Inventory(int player_Inventory[]) {
+void print_Inventory(int players_Inventory[]) {
 	cout << endl;
 	cout << "Your inventory: " << endl;
-	if (player_Inventory[0] > 0) {
-		cout << player_Inventory[0] << " Stellar debris" << endl;
+	if (players_Inventory[0] > 0) {
+		cout << players_Inventory[0] << " Stellar debris" << endl;
 	}
-	if (player_Inventory[1] > 0) {
-		cout  << player_Inventory[1]  << " Nebula shard(s)" << endl;
+	if (players_Inventory[1] > 0) {
+		cout  << players_Inventory[1]  << " Nebula shard(s)" << endl;
 	}
-	if (player_Inventory[2] > 0) {
-		cout  << player_Inventory[2]  << " Quantum core(s)" << endl;
+	if (players_Inventory[2] > 0) {
+		cout  << players_Inventory[2]  << " Quantum core(s)" << endl;
 	}
-	if (player_Inventory[3] > 0) {
-		cout  << player_Inventory[3] << " Dark matter essence(s)" << endl;
+	if (players_Inventory[3] > 0) {
+		cout  << players_Inventory[3] << " Dark matter essence(s)" << endl;
 	}
-	if (player_Inventory[0] == 0 && player_Inventory[1] == 0 && player_Inventory[2] == 0 && player_Inventory[3] == 0) {
+	if (players_Inventory[0] == 0 && players_Inventory[1] == 0 && players_Inventory[2] == 0 && players_Inventory[3] == 0) {
 		cout << "EMPTY" << endl;
 	}
 	cout << endl;
+}
+// players inventory and an array of items to give the player
+void give_Item(int players_Inventory[], int items[]) {
+	for (int i = 0; i < 4; i++){
+		players_Inventory[i] += items[i];
+	}
+	print_Dropped_Items("Items:", items);
 }
 
 //combat
@@ -452,8 +462,8 @@ void status_Effect_Actions(ship& ship, vector<artillery>& artillery) {
 		}
 	}
 	if (ship.get_Weaken_Status() > 0) {
-		ship.set_Disrupted_Status(ship.get_Disrupted_Status() - 1);
-		if (ship.get_Disrupted_Status() == 0) {
+		ship.set_Weaken_Status(ship.get_Weaken_Status() - 1);
+		if (ship.get_Weaken_Status() == 0) {
 			cout << "Hull integrity has been restored" << endl;
 			press_X_To_Continue();
 		}
@@ -798,13 +808,27 @@ void user_Action(int player_Choice, ship& players_Ship, vector<artillery>& playe
 		}
 	}
 }
-int read_Enemy_Input(ship& enemy_Ship, vector<artillery>& enemys_Artillery) {
+int read_Enemy_Input(ship& enemy_Ship, vector<artillery>& enemys_Artillery, ship& players_Ship) {
 	bool valid = false;
 	int enemy_Choice;
 
 	while (!valid) {
+		int max = 0;
+		int max_I;
+		if (players_Ship.get_Weaken_Status() > 0) {
+			for (int i = 0; i < enemys_Artillery.size(); i++){
+				
+				if (enemys_Artillery[i].get_Damage() > max) {
+					max_I = i;
+					max = enemys_Artillery[i].get_Damage();
+				}
+			}
+			enemy_Choice = max_I;
+		}
+		else {
+			enemy_Choice = random_Number(0, (enemys_Artillery.size() - 1));
+		}
 		
-		enemy_Choice = random_Number(0, (enemys_Artillery.size() - 1));
 		
 		
 		if (enemys_Artillery[enemy_Choice].get_Energy_Cost() <= enemy_Ship.get_Current_Energy() && enemys_Artillery[enemy_Choice].get_Current_Uses() > 0 && enemys_Artillery[enemy_Choice].get_Overheat_Status() <= 0) {
@@ -823,11 +847,11 @@ int read_Enemy_Input(ship& enemy_Ship, vector<artillery>& enemys_Artillery) {
 			valid = false;
 			for (int i = 0; i < enemys_Artillery.size()-1; i++) {
 				if (enemys_Artillery[i].get_Energy_Cost() <= enemy_Ship.get_Current_Energy() && enemys_Artillery[i].get_Current_Uses() > 0 && enemys_Artillery[i].get_Overheat_Status() <= 0) {
+
 					enemy_Choice = i; 
 					int uses_Remaining = enemys_Artillery[enemy_Choice].get_Current_Uses() - 1;
 					enemys_Artillery[enemy_Choice].set_Current_Uses(uses_Remaining);
 
-					//cout << enemy_Ship.get_Current_Energy() << " " << enemys_Artillery[enemy_Choice].get_Energy_Cost() << " ";
 					int energy_Remaining = enemy_Ship.get_Current_Energy() - enemys_Artillery[enemy_Choice].get_Energy_Cost();
 					enemy_Ship.set_Current_Energy(energy_Remaining);
 					valid = true;
@@ -903,7 +927,7 @@ void enemy_Action(int enemy_Choice, ship& players_Ship, ship& enemy_Ship, vector
 
 
 
-
+// players ship, players artillery, players inventory, enemy level, enemy ship, enemy's artillery
 int combat(ship& players_Ship, vector<artillery>& players_Artillery, int players_Inventory[], int enemy_Level, ship& enemy_Ship, vector<artillery>& enemys_Artillery) {
 	players_Ship.set_Current_Energy(players_Ship.get_Max_Energy());
 	while (enemy_Ship.get_Current_Health() > 0) {
@@ -924,7 +948,7 @@ int combat(ship& players_Ship, vector<artillery>& players_Artillery, int players
 					player_Choice_Loop = true;
 				}
 			}
-			int enemy_Choice = read_Enemy_Input(enemy_Ship, enemys_Artillery);
+			int enemy_Choice = read_Enemy_Input(enemy_Ship, enemys_Artillery, players_Ship);
 			int players_Artillery_Accuracy = 0;
 			int enemys_Artillery_Accuracy  = 0;
 			if (player_Choice > -1) {
@@ -1033,16 +1057,16 @@ int combat(ship& players_Ship, vector<artillery>& players_Artillery, int players
 
 //depot
 void add_Artillery1(vector<artillery>& artillery_Vector) {
-	artillery_Vector.push_back(artillery("graviton corroder", 30, 60, 35, 10, 20, true, false, false, false, false, 30, 0, "30% to corrosion"));
+	artillery_Vector.push_back(artillery("Graviton Corroder", 30, 60, 35, 10, 20, true, false, false, false, false, 30, 0, "30% to corrosion"));
 }
 void add_Artillery2(vector<artillery>& artillery_Vector) {
-	artillery_Vector.push_back(artillery("stasis cannon", 25, 85, 95, 15, 10, false, true, false, false, false, 40, 1, "40% to stun"));
+	artillery_Vector.push_back(artillery("Stasis Cannon", 25, 85, 95, 15, 10, false, true, false, false, false, 40, 1, "40% to stun"));
 }
 void add_Artillery3(vector<artillery>& artillery_Vector) {
-	artillery_Vector.push_back(artillery("voidpeircer", 15, 85, 95, 12, 10, false, false, true, false, false, 50, 2, "50% to weaken"));
+	artillery_Vector.push_back(artillery("Voidpeircer", 15, 85, 95, 12, 10, false, false, true, false, false, 50, 2, "50% to weaken"));
 }
 void add_Artillery4(vector<artillery>& artillery_Vector) {
-	artillery_Vector.push_back(artillery("star breaker", 65, 75, 15, 7, 35, false, false, false, true, false, 25, 3, "25% to overheat"));
+	artillery_Vector.push_back(artillery("Star Breaker", 65, 75, 15, 7, 35, false, false, false, true, false, 25, 3, "25% to overheat"));
 }
 
 
@@ -1453,6 +1477,12 @@ int ammo_Options(vector<artillery>& players_Artillery, int player_Inventory[]) {
 
 int starship_Depot(ship players_Ship, vector<artillery>& players_Artillery, vector<artillery>& artillery_For_Purchase, int player_Inventory[]) {
 	bool done = false;
+	cout << "Guided in by automated systems, your ship settled onto the docking bay with a heavy clang. " 
+	<< endl << "Mechanics and repair arms spring into action, a crew member giving you a quick nod before assessing the damage." << endl;
+	press_X_To_Continue();
+	/*
+	The last sparks of the pirate ship faded behind you, and your battered vessel rattled, systems flashing warnings of low fuel and hull breaches. After what felt like hours, a flicker of light appeared in the distance—a starship depot. Relief washed over you.
+*/
 	cout << "You've docked at a Starship Depot!" << endl 
 	<<  "Time to give your ship some love. Repair, upgrade, and stock up on new" << endl 
 	<< "artillery to keep your journey smooth and your enemies at bay " << endl;
@@ -1564,12 +1594,6 @@ int starship_Depot(ship players_Ship, vector<artillery>& players_Artillery, vect
 }
 
 string pick_Name() {
-	cout << "You are the captain of your very own spaceship, you are going to"
-		<< " have to navigate outer space while defending yourself against hostile"
-		<< " space pirates.You start out with basic artillery, but as you progress"
-		<< " you will be able to acquire new types of guns. You will also be able to"
-		<< " upgrade your ship with the materials you gain while fighting the enemies "
-		<< "you find in space. " << endl << endl;
 	string user_Name;
 	cout << "What do you want to name your vessel: " << endl;
 	getline(cin, user_Name);
@@ -1577,19 +1601,198 @@ string pick_Name() {
 	return user_Name;
 }
 
+void story_Part1() {
+	cout << "The dim lights of your cockpit flicker, a harsh reminder of your ship's fragility." << endl;
+	press_X_To_Continue();
+	cout << "Once, you might have scoffed at flying in such a patched-up vessel, but after the raid," << endl;
+	press_X_To_Continue();
+	cout << "it's all you have." << endl;
+	press_X_To_Continue();
+	cout << "Outside the viewport, the debris from what was once New Castra Station, your home, " << endl << "a bustling hub on the edge of Union space drifts silently," <<
+	endl << "a grim reminder of the pirate attack that destroyed everything you knew." << endl;
+	press_X_To_Continue();
+}
+void story_Part2() {
+	cout << "New Castra wasn't just a colony." << endl;
+	press_X_To_Continue();
+	cout << "It was a thriving, independent settlement—one that wanted no part of the Unified Celestial Alliance (UCA)." << endl;
+	press_X_To_Continue();
+	cout << "But in recent years, pirate factions have become unusually bold and well armed," << endl
+		<< "attacking vital colonies like New Castra with ruthless precision." << endl;
+	press_X_To_Continue_And_Clear();
+
+	cout << "The UCA's patrols rarely came this far out, but during the attack, they were nowhere to be seen." << endl;
+	press_X_To_Continue();
+	cout << "What happened to New Castra just doesn't sit right, the raiders have never been this powerful." << endl;
+	press_X_To_Continue();
+	cout << "And it cost you everything." << endl;
+	press_X_To_Continue_And_Clear();
+
+	cout << "As you push the engines to their limits, you feel the weight of the insignia that still clings to your jacket, the faded mark of the UCA Fleet. " << endl;
+	press_X_To_Continue();
+	cout << "Once, it was a symbol of pride." << endl;
+	press_X_To_Continue();
+	cout << "Now, it's a scar, a constant reminder of your failure to protect your home." << endl;
+	press_X_To_Continue();
+	cout << "You'd left the military for a quieter life, trading your uniform for a life on New Castra, " << endl;
+	press_X_To_Continue();
+	cout << "but the pirates took that life from you" << endl;
+	press_X_To_Continue();
+	cout << "in a single," << endl;
+	press_X_To_Continue();
+	cout << "merciless" << endl;
+	press_X_To_Continue();
+	cout << "attack." << endl;
+	press_X_To_Continue_And_Clear();
+
+	cout << "Revenge simmers in your veins, fueled by the echoing screams and blazing wreckage that still haunt you." << endl;
+	press_X_To_Continue();
+	cout << "These pirates aren't just bandits. They're organized, bold, and almost too well armed for mere raiders." << endl;
+	press_X_To_Continue();
+	cout << "Something bigger is at work here." << endl;
+	press_X_To_Continue();
+	cout << "Your fingers tighten around the controls as you activate the ship's weapons system." << endl;
+	press_X_To_Continue();
+	cout << "You've lost everything to the pirates. But now they're about to face everything you have left" << endl;
+	press_X_To_Continue_And_Clear();
+
+	cout << "Your ship strained as it pulled free from New Castra's drifting remains, the cockpit eerily silent." << endl;
+	press_X_To_Continue();
+	cout << "The ruins of your home, torn apart by pirate fire, still burned in your mind." << endl;
+	press_X_To_Continue();
+	cout << "You barely registered the blip on your radar, but when you saw the ship's silhouette, your pulse spiked." << endl;
+	press_X_To_Continue_And_Clear();
+	cout << "It was them. One of the pirate raiders that had destroyed New Castra." << endl;
+	press_X_To_Continue();
+	cout << "The battered, jagged vessel drifted through the debris, like a predator circling a fresh kill." << endl;
+	press_X_To_Continue();
+	cout << "Your fingers tightened on the controls. This ship was part of the very strike that left you alone in the galaxy." << endl;
+	press_X_To_Continue();
+	cout << "A crackling comm signal came through. 'Well, well, a little lost lamb left behind, hmm? " 
+	<< endl << "Didn't anyone tell you this sector's ours now?' The voice dripped with mockery." << endl;
+	press_X_To_Continue();
+	cout << "'You think everyone was just going to roll over and die?' you replied, fighting to keep your voice steady." << endl;
+	press_X_To_Continue();
+	cout << "A low chuckle answered. 'I remember your planet's 'fleet', nice ships. Too bad they popped like fireworks.'" << endl;
+	press_X_To_Continue();
+	cout << "Your shields were low, weapons basic, but revenge burned hotter than fear. 'Let's see who pops now.'" << endl;
+	press_X_To_Continue_And_Clear();
+
+}
+
+void loading_Screen(string text) {
+	int secs = random_Number(2, 6);
+	for (int i = 0; i < secs; i++){
+		cout << "\r" << text << "      ";
+		this_thread::sleep_for(chrono::seconds(1));
+		cout << "\r" << text << " .    ";
+		this_thread::sleep_for(chrono::seconds(1));
+		cout << "\r" << text << " . .  ";
+		this_thread::sleep_for(chrono::seconds(1));
+		cout << "\r" << text << " . . .";
+		this_thread::sleep_for(chrono::seconds(1));
+	}
+	system("cls");
+}
+
+void intermittent_Text() {
+	int num = random_Number(1, 3);
+	if (num == 1) {
+		cout << "Drifting through space, your radar suddenly pings, a hostile ship, dead ahead." << endl;
+	}
+	else if (num == 2) {
+		cout << "Drifting through the quiet of space, your sensors suddenly pick up a blip, an enemy ship." << endl;
+	}
+	else if (num == 3) {
+		cout << "As you glide through the quiet void, your radar flashes, a hostile ship in your path." << endl;
+	}
+	press_X_To_Continue_And_Clear();
+}
+void story_Part3(int players_Inventory[]) {
+	cout << "The last sparks of the pirate ship faded behind you, and your battered vessel rattled, " 
+	<< endl << "systems flashing warnings of low fuel and hull breaches. " << endl;
+	press_X_To_Continue();
+	cout << "After what felt like hours, a flicker of light appeared in the distance—a starship depot. " << endl << "Relief washes over you." << endl;
+	press_X_To_Continue_And_Clear();
+	cout << "You search your ship for any forgotten materials that could be used for trading, and you find some debris in a secluded corner of the ship" << endl;
+	int items[4] = { 5, 0, 0, 0 };
+	give_Item(players_Inventory, items);
+}
+void story_Part4() {
+	cout << "You leave Starship depot, the emptiness of space stretching ahead." << endl;
+	press_X_To_Continue();
+	cout << "Hours pass along a trade route, sensors quiet, until a blip appears on your radar." << endl;
+	press_X_To_Continue();
+	cout << "A pirate vessel looms into view, larger and more heavily armed than the last." << endl;
+	press_X_To_Continue();
+	cout << "A crackling voice sneers over the comm: 'Thought you could slip through our turf? Bad luck. Prepare to be boarded.' " << endl;
+	press_X_To_Continue();
+	cout << "You grip the controls, weapons hot. Out here, it's just you, them, and open space" << endl;
+	press_X_To_Continue_And_Clear();
+
+}
+void story_Part5() {
+	cout << "The pirate ship bursts into flames, spiraling out of control as it crashes onto a barren planet below. " << 
+		endl << "A plume of smoke marking its impact site on the surface. " << endl;
+	press_X_To_Continue();
+	cout << "Driven by curiosity and suspicion, you lower your ship down, following the wreckage to investigate." << endl;
+	press_X_To_Continue();
+	cout << "The planet’s surface is harsh and dusty, winds kicking up small clouds as you land near the crash site." << endl;
+	press_X_To_Continue();
+	cout << "The pirate vessel lies scattered, debris scattered across a wide radius. " << 
+		endl << "You walk through the wreckage carefully stepping over shredded metal and destroyed consoles." << endl;
+	press_X_To_Continue();
+	cout << "Among the wreckage, your eyes catch something peculiar, the gear the pirates left behind is marked with a familiar emblem, " << 
+		endl << "a symbol of the UCA.Weapons, armor, even the insignia on certain pieces, all unmistakably standard issue UCA." << endl;
+	press_X_To_Continue_And_Clear();
+	cout << "A chill runs down your spine. Pirates like these shouldn’t have access to UCA grade gear." << 
+		endl <<	"A thought begins to form." << endl;
+	press_X_To_Continue();
+	cout << "Had these pirates managed to steal from the UCA? " << endl;
+	press_X_To_Continue();
+	cout << "The idea seems far-fetched, security on UCA outposts was notoriously tight," << 
+		endl << "and this much gear would require inside knowledge or resources that the average pirate couldn't access. " << endl;
+	press_X_To_Continue();
+	cout << "But if they somehow had..." << endl;
+	press_X_To_Continue();
+	cout << "It would explain the pirates' recent surge in strength, their well coordinated attacks, " << 
+		endl << "and the heavy weaponry they now wielded. " << endl;
+	press_X_To_Continue();
+	cout << "You leave the wreckage with a sinking feeling." << endl;
+	press_X_To_Continue_And_Clear();
+}
+void story_Part6() {
+
+}
+void story_Part7() {
+
+ }
+void story_Part8() {
+
+}
+void story_Part9() {
+
+}
+void story_Part10() {
+
+}
+
 int main() {
-	int players_Inventory[4] = {32, 32, 32, 10};
+	int players_Inventory[4] = {0, 0, 0, 0};
 	vector<artillery> artillery_For_Purchase;
 	/*
 	Stellar Debris (Common), Nebula Shards (Uncommon), Quantum Cores (Rare), Dark Matter Essence (very rare)
 	// name, damage, accuracy, attack_Speed, max_Uses, energy_Cost, is_EMP, is_Pulse_Disruptor, is_Plasma_Overload);
 	*/
 	
+	//story_Part1();
 	string user_Name = pick_Name();
+	//story_Part2();
+
 	ship players_Ship(user_Name, 50, 50, 10, 10);
 	//name , health, energy, evasiveness, energy regen
 	vector<artillery> players_Artillery = {
-	artillery( "basic artillery", 15, 95, 50, 30, 5, false, false, false, true, false, 10, 0, "10% to overheat") };
+	artillery( "Basic Artillery", 15, 95, 60, 30, 5, false, false, false, true, false, 10, 0, "10% to overheat") };
 	// artillery(string name, int damage, int accuracy, int attack_Speed, int max_Uses, int energy_Cost, bool can_Corrode, bool can_Stun, bool can_Weaken, bool can_Overheat, bool can_Disrupt, int percent, int ammo_Quality, string ability_Name);
 	
 	//fight 1, level 1 
@@ -1598,62 +1801,64 @@ int main() {
 	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
 	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, true, false, 0, 0, " ") };
 
-	
-
 	combat(players_Ship, players_Artillery, players_Inventory, 1, enemy_Ship1, enemys_Artillery);
+	story_Part3(players_Inventory);
 	add_Artillery1(artillery_For_Purchase);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
 	
 	//fight2, level 1
-	ship enemy_Ship2("Astro bandit", 35, 20, 15, 25);
+	ship enemy_Ship2("Astro drifter", 50, 40, 15, 20);
 	enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
+	artillery("Solar lance", 20, 20, 60, 6, 15, false, false, false, false, false, 0, 0, " ")};
+	story_Part4();
 	combat(players_Ship, players_Artillery, players_Inventory, 1, enemy_Ship2, enemys_Artillery);
 	enemys_Artillery.clear();
 
 	//fight 3, level 1
-	ship enemy_Ship3("Scavenger", 35, 20, 15, 25);
+	ship enemy_Ship3("Scavenger", 85, 30, 5, 65);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
+	artillery("Energy disruptor", 15, 90, 70, 10, 10, false, false, false, false, true, 50, 0, " ") };
+	loading_Screen("Flying through space");
+	intermittent_Text();
 	combat(players_Ship, players_Artillery, players_Inventory, 1, enemy_Ship3, enemys_Artillery);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
 
 
 	//2
-	//fight 1 level2
+	//fight 1 level 2
 	add_Artillery1(artillery_For_Purchase);
-	ship enemy_Ship4("Enforcer", 35, 20, 15, 25);
+	ship enemy_Ship4("Enforcer", 70, 40, 5, 50);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
+	artillery("Ion Pulse Blaster", 30, 10, 70, 5, 20, false, false, false, true, false, 20, 0, " ")};
+	story_Part5();
+	loading_Screen("Flying through space");
+	intermittent_Text();
 	combat(players_Ship, players_Artillery, players_Inventory, 2, enemy_Ship4, enemys_Artillery);
 	enemys_Artillery.clear();
 
 	//fight 2, level 2
-	ship enemy_Ship5("Starbane Raider", 35, 20, 15, 25);
+	ship enemy_Ship5("Starbane Raider", 55, 25, 55, 100);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
+	artillery("Void Ripper", 10, 80, 70, 40, 5, false, false, true, false, false, 50, 0, " "),
+	artillery("Howitzer", 30, 70, 20, 2, 20, false, false, false, false, false, 0, 0, " ") };
 	combat(players_Ship, players_Artillery, players_Inventory, 2, enemy_Ship5, enemys_Artillery);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
 
 	//fight 2, level 2
-	ship enemy_Ship6("Scourge", 35, 20, 15, 25);
+	ship enemy_Ship6("Scourge", 45, 35, 35, 15);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
+	artillery("Ion Pulse Blaster", 10, 100, 100, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Corrosion Harpoon", 5, 85, 50, 1, 10, true, false, false, false, false, 80, 0, " ")};
 	combat(players_Ship, players_Artillery, players_Inventory, 2, enemy_Ship6, enemys_Artillery);
 	enemys_Artillery.clear();
 
 	//3
 	//fight 1, level 3
 	add_Artillery2(artillery_For_Purchase);
-	ship enemy_Ship7("Eclipse Marauder", 35, 20, 15, 25);
+	ship enemy_Ship7("Eclipse Marauder", 80, 65, 20, 5);
 	 enemys_Artillery = {
 	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
 	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
@@ -1662,15 +1867,15 @@ int main() {
 	enemys_Artillery.clear();
 
 	//fight 2, level 3
-	ship enemy_Ship8("Tempest", 35, 20, 15, 25);
+	ship enemy_Ship8("Tempest", 20, 40, 45, 25);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
+	artillery("Ion Beam Cannon", 50, 35, 100, 7, 20, false, false, false, true, false, 50, 0, " "),
+	artillery("EMP Burst", 5, 100, 90, 1, 20, false, true, false, false, false,0, 0, " ") };
 	combat(players_Ship, players_Artillery, players_Inventory, 3, enemy_Ship8, enemys_Artillery);
 	enemys_Artillery.clear();
 
 	//fight 3, level 3
-	ship enemy_Ship9("Space Vultures", 35, 20, 15, 25);
+	ship enemy_Ship9("Space Vulture", 35, 20, 15, 25);
 	 enemys_Artillery = {
 	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
 	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
