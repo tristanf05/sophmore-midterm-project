@@ -1,13 +1,15 @@
+using namespace std;
 #include <iostream>
 #include <random>
-//#include <cmath>
 #include <string>
 #include <sstream>
 #include <cstring>
+
+#include <cctype>
+#include <algorithm>
 #include "ship.h"
-using namespace std;
-std::random_device rd;
-std::mt19937 gen(rd());
+
+
 bool player_Corrosion;
 bool player_Weakened;
 bool player_Stunned;
@@ -19,7 +21,7 @@ bool enemy_Stunned;
 bool enemy_Overheated;
 bool enemy_Disrupted;
 
-using namespace std;
+
 //miscellaneous stuff
 std::string print_True_False(bool T_OR_F) {
 	if (T_OR_F) {
@@ -54,7 +56,10 @@ void press_X_To_Continue_And_Clear() {
 	system("cls");
 	std::cout << std::endl;
 }
+
 int random_Number(int min, int max) {
+	random_device rd;
+	mt19937 gen(rd());
 	std::uniform_int_distribution<> distribution(min, max);
 	return distribution(gen);
 }
@@ -178,9 +183,15 @@ void print_Num_Spaces(int num_Spaces) {
 	}
 }
 //statuses
-bool ship::check_Statuses() {
-	for (int i = 0; i < 5; i++) {
+bool check_Statuses(ship ship, vector<artillery>& artillery) {
+	int* status_Effects = ship.get_All_Statuses();
+	for (int i = 0; i < 4; i++) {
 		if (status_Effects[i] > 0) {
+			return true;
+		}
+	}
+	for (int i = 0; i < artillery.size(); i++){
+		if (artillery[i].get_Overheat_Status() > 0) {
 			return true;
 		}
 	}
@@ -191,16 +202,25 @@ void reset_Status_Displays() {
 	player_Weakened = false;
 	player_Stunned = false;
 	player_Overheated = false;
+	player_Disrupted = false;
+
 	enemy_Corrosion = false;
 	enemy_Weakened = false;
 	enemy_Stunned = false;
 	enemy_Overheated = false;
+	enemy_Disrupted = false;
 }
-void print_Current_Statuses(ship players_Ship, ship enemy_Ship, int line) {
-	
-
+bool check_Overheat_Statuses(vector<artillery>& artillery) {
+	for (int i = 0; i < artillery.size(); i++){
+		if (artillery[i].get_Overheat_Status() > 0) {
+			return true;
+		}
+	}
+	return false;
+}
+void print_Current_Statuses(ship players_Ship, ship enemy_Ship, vector<artillery>& players_Artillery, vector<artillery>& enemys_Artillery, int line) {
 	if (line == 1) {
-		if (!players_Ship.check_Statuses()) {
+		if (!check_Statuses(players_Ship, players_Artillery)) {
 			cout << "NONE";
 			print_Num_Spaces(34);
 		}
@@ -219,7 +239,7 @@ void print_Current_Statuses(ship players_Ship, ship enemy_Ship, int line) {
 			print_Num_Spaces(31);
 			player_Stunned = true;
 		}
-		else if (players_Ship.get_Overheat_Status() > 0) {
+		else if (check_Overheat_Statuses(players_Artillery)) {
 			cout << "Overheated weapon";
 			print_Num_Spaces(21);
 			player_Overheated = true;
@@ -229,9 +249,12 @@ void print_Current_Statuses(ship players_Ship, ship enemy_Ship, int line) {
 			print_Num_Spaces(29);
 			player_Disrupted = true;
 		}
+		else {
+			print_Num_Spaces(38);
+		}
 
 
-		if (!enemy_Ship.check_Statuses()) {
+		if (!check_Statuses(enemy_Ship, enemys_Artillery)) {
 			cout << "NONE" << endl;
 		}
 		else if (enemy_Ship.get_Corrode_Status() > 0) {
@@ -246,7 +269,7 @@ void print_Current_Statuses(ship players_Ship, ship enemy_Ship, int line) {
 			cout << "Stunned" << endl;
 			enemy_Stunned = true;
 		}
-		else if (enemy_Ship.get_Overheat_Status() > 0) {
+		else if (check_Overheat_Statuses(enemys_Artillery)) {
 			cout << "Overheated weapon" << endl;
 			enemy_Overheated = true;
 
@@ -255,6 +278,7 @@ void print_Current_Statuses(ship players_Ship, ship enemy_Ship, int line) {
 			cout << "Disrupted" << endl;
 			enemy_Disrupted = true;
 		}
+		
 	}
 	else if (line == 2) {
 		if (players_Ship.get_Weaken_Status() > 0 && !player_Weakened) {
@@ -267,7 +291,7 @@ void print_Current_Statuses(ship players_Ship, ship enemy_Ship, int line) {
 			print_Num_Spaces(31);
 			player_Stunned = true;
 		}
-		else if (players_Ship.get_Overheat_Status() > 0 && !player_Overheated) {
+		else if (check_Overheat_Statuses(players_Artillery) && !player_Overheated) {
 			cout << "Overheated weapon";
 			print_Num_Spaces(21);
 			player_Overheated = true;
@@ -276,6 +300,9 @@ void print_Current_Statuses(ship players_Ship, ship enemy_Ship, int line) {
 			cout << "Disrupted";
 			print_Num_Spaces(29);
 			player_Disrupted = true;
+		}
+		else {
+			print_Num_Spaces(38);
 		}
 
 		if (enemy_Ship.get_Weaken_Status() > 0 && !enemy_Weakened) {
@@ -286,7 +313,7 @@ void print_Current_Statuses(ship players_Ship, ship enemy_Ship, int line) {
 			cout << "Stunned" << endl;
 			enemy_Stunned = true;
 		}
-		else if (enemy_Ship.get_Overheat_Status() > 0 && !enemy_Overheated) {
+		else if (check_Overheat_Statuses(enemys_Artillery) && !enemy_Overheated) {
 			cout << "Overheated weapon" << endl;
 			enemy_Overheated = true;
 		}
@@ -306,7 +333,7 @@ void print_Current_Statuses(ship players_Ship, ship enemy_Ship, int line) {
 			print_Num_Spaces(32);
 			player_Stunned = true;
 		}
-		else if (players_Ship.get_Overheat_Status() > 0 && !player_Overheated) {
+		else if (check_Overheat_Statuses(players_Artillery) && !player_Overheated) {
 			cout << "Overheated weapon";
 			print_Num_Spaces(21);
 			player_Overheated = true;
@@ -316,14 +343,21 @@ void print_Current_Statuses(ship players_Ship, ship enemy_Ship, int line) {
 			print_Num_Spaces(29);
 			player_Disrupted = true;
 		}
+		else {
+			print_Num_Spaces(38);
+		}
 
 		if (enemy_Ship.get_Stun_Status() > 0 && !enemy_Stunned) {
 			cout << "Stunned" << endl;
 			enemy_Stunned = true;
 		}
-		else if (enemy_Ship.get_Overheat_Status() > 0 && !enemy_Overheated) {
+		else if (check_Overheat_Statuses(enemys_Artillery) && !enemy_Overheated) {
 			cout << "Overheated weapon" << endl;
 			enemy_Overheated = true;
+		}
+		else if (enemy_Ship.get_Disrupted_Status() > 0 && !enemy_Disrupted) {
+			cout << "Disrupted" << endl;
+			enemy_Disrupted = true;
 		}
 		else {
 			cout << endl;
@@ -331,7 +365,7 @@ void print_Current_Statuses(ship players_Ship, ship enemy_Ship, int line) {
 		
 	}
 	else if (line == 4) {
-		if (players_Ship.get_Overheat_Status() > 0 && !player_Overheated) {
+		if (check_Overheat_Statuses(players_Artillery) && !player_Overheated) {
 			cout << "Overheated weapon";
 			print_Num_Spaces(21);
 			player_Overheated = true;
@@ -341,7 +375,10 @@ void print_Current_Statuses(ship players_Ship, ship enemy_Ship, int line) {
 			print_Num_Spaces(29);
 			player_Disrupted = true;
 		}
-		if (enemy_Ship.get_Overheat_Status() > 0 && !enemy_Overheated) {
+		else {
+			print_Num_Spaces(38);
+		}
+		if (check_Overheat_Statuses(enemys_Artillery) && !enemy_Overheated) {
 			cout << "Overheated weapon" << endl;
 			enemy_Overheated = true;
 		}
@@ -359,6 +396,9 @@ void print_Current_Statuses(ship players_Ship, ship enemy_Ship, int line) {
 			print_Num_Spaces(29);
 			player_Disrupted = true;
 		}
+		else {
+			print_Num_Spaces(38);
+		}
 		if (enemy_Ship.get_Disrupted_Status() > 0 && !enemy_Disrupted) {
 			cout << "Disrupted" << endl;
 			enemy_Disrupted = true;
@@ -371,46 +411,99 @@ void print_Current_Statuses(ship players_Ship, ship enemy_Ship, int line) {
 
 }
 
-void ship::reduce_Status_Effects() {
-
-
+void status_Effect_Actions(ship& ship, vector<artillery>& artillery) {
+	string capitalized_Name = ship.get_Name();
+	transform(capitalized_Name.begin(), capitalized_Name.end(), capitalized_Name.begin(), ::toupper);
+	cout << capitalized_Name << " STATUS EFFECT UPDATES: " << endl << endl;
+	if (ship.get_Corrode_Status() > 0) {
+		int current_Health = ship.get_Current_Health();
+		for (int i = 0; i < ship.get_Corrode_Status() && ship.get_Current_Health() > 0; i++) {
+			ship.set_Current_Health(current_Health - 1);
+		}
+		cout <<  "Took " << ship.get_Corrode_Status() << " corrosion damage" << endl;
+		press_X_To_Continue();
+		ship.set_Corrosion_Status();
+	}
+	if (ship.get_Stun_Status() == 1) {
+		int chance = random_Number(1, 100);
+		if (chance <= 70) {
+			ship.set_Stun_Status(0);
+			cout <<  "Operating systems have rebooted" << endl;
+			press_X_To_Continue();
+		}
+	}
+	else if (ship.get_Stun_Status() > 1) {
+		ship.set_Stun_Status(ship.get_Stun_Status() - 1);
+	}
+	for (int i = 0; i < artillery.size(); i++){
+		if (artillery[i].get_Overheat_Status() > 0) {
+			artillery[i].set_Overheat_Status(artillery[i].get_Overheat_Status() - 1);
+			if (artillery[i].get_Overheat_Status() == 0) {
+				cout << "The " << ship.get_Name() << "'s " << artillery[i].get_Name() << " cooled down and is now usable again" << endl;
+				press_X_To_Continue();
+			}
+		}
+	}
+	if (ship.get_Disrupted_Status() > 0) {
+		ship.set_Disrupted_Status(ship.get_Disrupted_Status() - 1);
+		if (ship.get_Disrupted_Status() == 0) {
+			cout << "Energy generator back online" << endl;
+			press_X_To_Continue();
+		}
+	}
+	if (ship.get_Weaken_Status() > 0) {
+		ship.set_Disrupted_Status(ship.get_Disrupted_Status() - 1);
+		if (ship.get_Disrupted_Status() == 0) {
+			cout << "Hull integrity has been restored" << endl;
+			press_X_To_Continue();
+		}
+	}
 }
-void ship::apply_Overheat_Status(int percent, int num_Turns) {
+int artillery::can_Apply_Overheat_Status(int percent) {
 	int chance = random_Number(1, 100);
 	if (chance <= percent) {
+		int num_Turns = random_Number(1, 2);
 		set_Overheat_Status(num_Turns);
+		return num_Turns;
 	}
+	return false;
 }
-void ship::apply_Weakened_Status(int percent, int num_Turns) {
+int can_Apply_Weakened_Status(int percent) {
 	int chance = random_Number(1, 100);
 	if (chance <= percent) {
-		set_Weaken_Status(num_Turns);
+		return 1;
 	}
+	return false;
 }
-void ship::apply_Stun_Status(int percent, int num_Turns) {
+int can_Apply_Stun_Status(int percent) {
 	int chance = random_Number(1, 100);
 	if (chance <= percent) {
-		set_Stun_Status(num_Turns);
+		return 1;
 	}
+	return false;
 }
-void ship::apply_Corrosion_Status(int percent, int num_Turns) {
+int can_Apply_Corrosion_Status(int percent) {
 	int chance = random_Number(1, 100);
 	if (chance <= percent) {
-		set_Corrosion_Status(num_Turns);
+		return 1;
 	}
+	return false;
 }
-void ship::apply_Disrupted_Status(int percent, int num_Turns) {
+
+int can_Apply_Disrupted_Status(int percent) {
 	int chance = random_Number(1, 100);
 	if (chance <= percent) {
-		set_Disrupted_Status(num_Turns);
+		int num_Turns = random_Number(3, 5);
+		return num_Turns;
 	}
+	return false;
 }
 void status_Codex() {
 	system("cls");
 	cout << "STATUS CODEX" << endl;
 	cout << "----------------------" << endl;
-	cout << "Corrosion: deals damage over time, dealing more each turn" << endl;
-	cout << "Weaken: decreases the target's defense by 50% for 1 turn" << endl;
+	cout << "Corrosion: deals damage over time, dealing more each turn, to cure corrosive purchase a repair from a starship depot" << endl;
+	cout << "Weaken: decreases the target's defense by 50% for 1-2 turn" << endl;
 	cout << "Stun: disables the target's ability to act for a turn, 70% chance it goes away the subsequent turn" << endl;
 	cout << "Overheat: disables the overheated artillery for 1-2 turns" << endl;
 	cout << "Disrupted: disables energy regeneration for 3 - 5 turns" << endl;
@@ -431,7 +524,7 @@ void ship::print_Detailed_Stats() {
 	
 }
 
-void print_Stats(ship players_Ship, ship enemy_Ship) {
+void print_Stats(ship players_Ship, ship enemy_Ship, vector<artillery>& players_Artillery, vector<artillery>& enemys_Artillery) {
 	reset_Status_Displays();
 	int player_Name_Length = 30 - players_Ship.get_Name().length();
 	int enemy_Name_Length = 34 - enemy_Ship.get_Name().length();
@@ -440,25 +533,45 @@ void print_Stats(ship players_Ship, ship enemy_Ship) {
 	print_Num_Spaces(player_Name_Length);
 	cout << "STATUS EFFECTS:\t\t\t" << "ENEMY STATUS EFFECTS:" << endl;
 	cout << "Health: " << players_Ship.get_Current_Health() << "/" << players_Ship.get_Max_Health();
-	print_Num_Spaces(29);
-	cout << "---------------------\t\t\t---------------------" <<  endl;
+	if (players_Ship.get_Current_Energy() >= 10) {
+		print_Num_Spaces(29);
+	}
+	else {
+		print_Num_Spaces(30);
+	}
+	cout << "---------------------\t\t\t---------------------" << endl;
 	cout << "Energy: " << players_Ship.get_Current_Energy() << "/" << players_Ship.get_Max_Energy();
-	print_Num_Spaces(29);
-	print_Current_Statuses(players_Ship, enemy_Ship, 1);
+	if (players_Ship.get_Current_Energy() >= 10) {
+		print_Num_Spaces(29);
+	}
+	else {
+		print_Num_Spaces(30);
+	}
+	print_Current_Statuses(players_Ship, enemy_Ship, players_Artillery, enemys_Artillery, 1);
 	cout << "--------------------";
 	print_Num_Spaces(22);
-	print_Current_Statuses(players_Ship, enemy_Ship, 2);
+	print_Current_Statuses(players_Ship, enemy_Ship, players_Artillery, enemys_Artillery, 2);
 	cout << enemy_Ship.get_Name() << "'s stats";
 	print_Num_Spaces(enemy_Name_Length);
-	print_Current_Statuses(players_Ship, enemy_Ship, 3);
+	print_Current_Statuses(players_Ship, enemy_Ship, players_Artillery, enemys_Artillery, 3);
 	cout << "Health: " << enemy_Ship.get_Current_Health() << "/" << enemy_Ship.get_Max_Health();
-	print_Num_Spaces(29);
-	print_Current_Statuses(players_Ship, enemy_Ship, 4);
+	if (players_Ship.get_Current_Energy() >= 10) {
+		print_Num_Spaces(29);
+	}
+	else {
+		print_Num_Spaces(30);
+	}
+	print_Current_Statuses(players_Ship, enemy_Ship, players_Artillery, enemys_Artillery, 4);
 	cout << "Energy: " << enemy_Ship.get_Current_Energy() << "/" << enemy_Ship.get_Max_Energy();
-	print_Num_Spaces(29);
-	print_Current_Statuses(players_Ship, enemy_Ship, 5);
+	if (players_Ship.get_Current_Energy() >= 10) {
+		print_Num_Spaces(29);
+	}
+	else {
+		print_Num_Spaces(30);
+	}
+	print_Current_Statuses(players_Ship, enemy_Ship, players_Artillery, enemys_Artillery, 5);
 	cout << "--------------------                      ---------------------                 ---------------------" << endl;
-	//       ------------------------------------------------------------------------------------------------------
+	
 }
 
 //dodging
@@ -477,15 +590,23 @@ void ship::evade_Action(int accuracy) {
 	energy_Regen = (energy_Regen / 100);
 	int energy = get_Max_Energy() * energy_Regen;
 	int total_Energy_Regenerated = get_Current_Energy();
-	for (int i = 0; i < energy && total_Energy_Regenerated < get_Max_Energy(); i++) {
-		total_Energy_Regenerated += 1;
+	if (get_Disrupted_Status() > 0) {
+		cout << "The " << get_Name() << " preformed evasive maneuvers, but was unable to regain energy" 
+		<< endl <<  "because its energy generator is disrupted" << endl;
 	}
-	set_Current_Energy(total_Energy_Regenerated);
-	//
-	bool evaded = evade(accuracy - get_Evasiveness());
-	set_Evaded(evaded);
-	cout << "The " << get_Name() <<
+	else {
+		for (int i = 0; i < energy && total_Energy_Regenerated < get_Max_Energy(); i++) {
+				total_Energy_Regenerated += 1;
+			}
+		set_Current_Energy(total_Energy_Regenerated);
+		bool evaded = evade(accuracy - get_Evasiveness());
+		set_Evaded(evaded);
+		cout << "The " << get_Name() <<
 		" preformed evasive maneuvers and recovered some energy" << endl;
+	}
+	
+	//
+	
 
 
 }
@@ -507,56 +628,63 @@ void print_Player_Options(ship players_Ship, std::vector<artillery> players_Arti
 	cout << "Enter a number to fire the corresponding artillery, or press 0 to regain some energy and increase your chances to dodge an attack" << endl;
 	cout << "Press " << players_Artillery.size() + 1 << " to bring up the status codex" << endl;
 	for (int i = 0; i < players_Artillery.size(); i++){
-		cout << "--------------------   ";
+		cout << "------------------";
+		print_Num_Spaces(6);
 	}
 	cout << endl;
 	for (int i = 0; i < players_Artillery.size(); i++) {
 		cout << (i + 1) << ") " << players_Artillery[i].get_Name();
-		int space = 20 - players_Artillery[i].get_Name().length();
+		int space = 21 - players_Artillery[i].get_Name().length();
 		for (int j = 0; j < space; j++) {
 			cout << " ";
 		}
 	}
 	cout << endl;
 	for (int i = 0; i < players_Artillery.size(); i++) {
-		cout << "Damage: " << players_Artillery[i].get_Damage() << "             ";
+		cout << "Damage: " << players_Artillery[i].get_Damage();
+		print_Num_Spaces(14);
 	}
 	cout << endl;
 	for (int i = 0; i < players_Artillery.size(); i++) {
-		cout << "Accuracy: " << players_Artillery[i].get_Accuracy() << "%" << "          ";
+		cout << "Accuracy: " << players_Artillery[i].get_Accuracy() << "%";
+		print_Num_Spaces(11);
+
 	}
 	cout << endl;
 	for (int i = 0; i < players_Artillery.size(); i++) {
-		cout << "Energy cost: " << players_Artillery[i].get_Energy_Cost() << "        ";
+		cout << "Energy cost: " << players_Artillery[i].get_Energy_Cost();
 		if (players_Artillery[i].get_Energy_Cost() < 10) {
-			cout << " ";
+			print_Num_Spaces(10);
+		}
+		else {
+			print_Num_Spaces(9);
 		}
 	}
 	cout << endl;
 	for (int i = 0; i < players_Artillery.size(); i++) {
-		cout << "Attack speed: " << players_Artillery[i].get_Attack_Speed() << "       ";
+		cout << "Attack speed: " << players_Artillery[i].get_Attack_Speed();
+		print_Num_Spaces(8);
 	}
 	cout << endl;
 	for (int i = 0; i < players_Artillery.size(); i++) {
-		cout << "Available ammo: " << players_Artillery[i].get_Current_Uses() << "/" << players_Artillery[i].get_Max_Uses() << "  ";
+		cout << "Available ammo: " << players_Artillery[i].get_Current_Uses() << "/" << players_Artillery[i].get_Max_Uses();
+		print_Num_Spaces(3);
 		if (players_Artillery[i].get_Max_Uses() < 10) {
-			cout << " ";
+			print_Num_Spaces(1);
 		}
 		if (players_Artillery[i].get_Current_Uses() < 10) {
-			cout << " ";
+			print_Num_Spaces(1);
 		}
 	}
 	cout << endl;
 	for (int i = 0; i < players_Artillery.size(); i++) {
 		// std::string sub = str.substr(7, 5);
 		cout << "Ability:";
-		int space = 15 - players_Artillery[i].get_Ability_Name().length();
+		int space = 16 - players_Artillery[i].get_Ability_Name().length();
 		cout << players_Artillery[i].get_Ability_Name();
 		for (int j = 0; j < space; j++) {
 			cout << " ";
 		}
-		
-		
 	}
 	cout << endl;
 	
@@ -566,47 +694,108 @@ void print_Player_Options(ship players_Ship, std::vector<artillery> players_Arti
 int read_User_Input(ship& players_Ship, vector<artillery>& players_Artillery) {
 	bool valid = false;
 	int player_Choice = return_Player_Choice();
-	while (!valid) {
-		
-		if (player_Choice == 0 || player_Choice == players_Artillery.size() + 1) {
-			valid = true;
-			return player_Choice - 1;
-		}
-		else if (player_Choice > 0 && player_Choice <= players_Artillery.size()) {
-			if (players_Ship.get_Current_Energy() >= players_Artillery[player_Choice-1].get_Energy_Cost()) {
-				if (players_Artillery[player_Choice-1].get_Current_Uses() > 0) {
-					valid = true;
-					int uses_Remaining = players_Artillery [player_Choice- 1] .get_Current_Uses() - 1;
-					players_Artillery[player_Choice -1].set_Current_Uses(uses_Remaining);
-					int energy_Remaining = players_Ship.get_Current_Energy() - players_Artillery[player_Choice -1].get_Energy_Cost();
-					players_Ship.set_Current_Energy(energy_Remaining);
-					return player_Choice - 1;
+	if (players_Ship.get_Stun_Status() <= 0) {
+		while (!valid) {
+			if (player_Choice == 0 || player_Choice == players_Artillery.size() + 1) {
+				valid = true;
+				return (player_Choice - 1);
+			}
+			else if (player_Choice > 0 && player_Choice <= players_Artillery.size()) {
+				if (players_Ship.get_Current_Energy() >= players_Artillery[player_Choice - 1].get_Energy_Cost()) {
+					if (players_Artillery[player_Choice - 1].get_Current_Uses() > 0) {
+						if (!players_Artillery[player_Choice - 1].get_Overheat_Status()) {
+							valid = true;
+							int uses_Remaining = players_Artillery[player_Choice - 1].get_Current_Uses() - 1;
+							players_Artillery[player_Choice - 1].set_Current_Uses(uses_Remaining);
+							int energy_Remaining = players_Ship.get_Current_Energy() - players_Artillery[player_Choice - 1].get_Energy_Cost();
+							players_Ship.set_Current_Energy(energy_Remaining);
+							return (player_Choice - 1);
+						}
+						else {
+							cout << "This weapon has been overheated, and is not operable" << endl;
+							player_Choice = return_Player_Choice();
+						}
+
+					}
+					else {
+						cout << "You do not have enough ammo" << endl;
+						player_Choice = return_Player_Choice();
+					}
 				}
 				else {
-					cout << "You do not have enough ammo" << endl;
+					cout << "You do not have enough energy to fire this weapon" << endl;
 					player_Choice = return_Player_Choice();
 				}
 			}
 			else {
-				cout << "You do not have enough energy to fire this weapon" << endl;
+				cout << "Invalid, please try again" << endl;
 				player_Choice = return_Player_Choice();
 			}
 		}
-		else {
-			cout << "Invalid, please try again" << endl;
-			player_Choice = return_Player_Choice();
-		}
-	}
-}
-void user_Action(int player_Choice, ship& players_Ship, vector<artillery>& players_Artillery, ship& enemy_Ship) {
-	if (enemy_Ship.get_Evaded() == false && evade(players_Artillery[player_Choice].get_Accuracy() == false)) {
-		int remaining_Health = enemy_Ship.get_Current_Health() - players_Artillery[player_Choice].get_Damage();
-		enemy_Ship.set_Current_Health(remaining_Health);
-		cout << "You fired your " << players_Artillery[player_Choice].get_Name() << " and dealt " << players_Artillery[player_Choice].get_Damage() << " damage" << endl;
 	}
 	else {
-		cout << "You fired your " << players_Artillery[player_Choice].get_Name() << ", however the " << enemy_Ship.get_Name() << " was able to dodge it" << endl;
-		enemy_Ship.set_Evaded(false);
+		cout << "Your ship's operating system has been stunned" << endl;
+		valid = true;
+		press_X_To_Continue();
+		return -2;
+		
+	}
+
+}
+void user_Action(int player_Choice, ship& players_Ship, vector<artillery>& players_Artillery, ship& enemy_Ship) {
+	int num_Turns;
+	int percent = players_Artillery[player_Choice].get_Percent();
+	if (player_Choice >= 0) {
+		if (enemy_Ship.get_Evaded() == false && evade(players_Artillery[player_Choice].get_Accuracy() == false)) {
+			int damage_Dealt = players_Artillery[player_Choice].get_Damage();
+			if (enemy_Ship.get_Weaken_Status() > 0) {
+				damage_Dealt *= 1.5;
+			}
+			int remaining_Health = enemy_Ship.get_Current_Health() - damage_Dealt;
+			enemy_Ship.set_Current_Health(remaining_Health);
+
+			cout << "You fired your " << players_Artillery[player_Choice].get_Name() << " and dealt " << damage_Dealt << " damage" << endl;
+
+			if (players_Artillery[player_Choice].get_Can_Corrode()) {
+				if (can_Apply_Corrosion_Status(percent) > 0) {
+					enemy_Ship.set_Corrosion_Status();
+					cout << "and you also inflicted corrosion on the " << enemy_Ship.get_Name() << endl;
+				}
+
+			}
+			else if (players_Artillery[player_Choice].get_Can_Weaken()) {
+				if (can_Apply_Weakened_Status(percent) > 0) {
+					num_Turns = random_Number(2, 3);
+					enemy_Ship.set_Weaken_Status(num_Turns);
+					cout << "and you also weakened the " << enemy_Ship.get_Name() << "'s hull" << endl;
+				}
+			}
+			else if (players_Artillery[player_Choice].get_Can_Stun()) {
+				if (can_Apply_Stun_Status(percent) > 0) {
+					enemy_Ship.set_Stun_Status(2);
+					cout << "and you also stunned the " << enemy_Ship.get_Name() << "'s operating systems" << endl;
+				}
+			}
+			else if (players_Artillery[player_Choice].get_Can_Disrupt()) {
+				if (can_Apply_Disrupted_Status(percent) > 0) {
+					num_Turns = random_Number(5, 6);
+					enemy_Ship.set_Disrupted_Status(num_Turns);
+					cout << "and you also disrupted the " << enemy_Ship.get_Name() << "'s energy generator" << endl;
+				}
+			}
+		}
+		else {
+			cout << "You fired your " << players_Artillery[player_Choice].get_Name() << ", however the " << enemy_Ship.get_Name() << " was able to dodge it" << endl;
+			enemy_Ship.set_Evaded(false);
+		}
+		if (players_Artillery[player_Choice].get_Can_Overheat()) {
+			if (players_Artillery[player_Choice].can_Apply_Overheat_Status(percent) > 0) {
+				num_Turns = random_Number(2, 3);
+				players_Artillery[player_Choice].set_Overheat_Status(num_Turns);
+				cout << "however, this weapon has overheated and will not be operable for the next " << num_Turns - 1 << " turns" << endl;
+			}
+
+		}
 	}
 }
 int read_Enemy_Input(ship& enemy_Ship, vector<artillery>& enemys_Artillery) {
@@ -618,7 +807,7 @@ int read_Enemy_Input(ship& enemy_Ship, vector<artillery>& enemys_Artillery) {
 		enemy_Choice = random_Number(0, (enemys_Artillery.size() - 1));
 		
 		
-		if (enemys_Artillery[enemy_Choice].get_Energy_Cost() <= enemy_Ship.get_Current_Energy() && enemys_Artillery[enemy_Choice].get_Current_Uses() > 0) {
+		if (enemys_Artillery[enemy_Choice].get_Energy_Cost() <= enemy_Ship.get_Current_Energy() && enemys_Artillery[enemy_Choice].get_Current_Uses() > 0 && enemys_Artillery[enemy_Choice].get_Overheat_Status() <= 0) {
 			
 			int uses_Remaining = enemys_Artillery[enemy_Choice].get_Current_Uses() - 1;
 			enemys_Artillery[enemy_Choice].set_Current_Uses(uses_Remaining);
@@ -633,7 +822,7 @@ int read_Enemy_Input(ship& enemy_Ship, vector<artillery>& enemys_Artillery) {
 		else {
 			valid = false;
 			for (int i = 0; i < enemys_Artillery.size()-1; i++) {
-				if (enemys_Artillery[i].get_Energy_Cost() <= enemy_Ship.get_Current_Energy() && enemys_Artillery[i].get_Current_Uses() > 0) {
+				if (enemys_Artillery[i].get_Energy_Cost() <= enemy_Ship.get_Current_Energy() && enemys_Artillery[i].get_Current_Uses() > 0 && enemys_Artillery[i].get_Overheat_Status() <= 0) {
 					enemy_Choice = i; 
 					int uses_Remaining = enemys_Artillery[enemy_Choice].get_Current_Uses() - 1;
 					enemys_Artillery[enemy_Choice].set_Current_Uses(uses_Remaining);
@@ -656,16 +845,57 @@ int read_Enemy_Input(ship& enemy_Ship, vector<artillery>& enemys_Artillery) {
 	return enemy_Choice;
 }
 void enemy_Action(int enemy_Choice, ship& players_Ship, ship& enemy_Ship, vector<artillery>& enemys_Artillery) {
+	int percent = enemys_Artillery[enemy_Choice].get_Percent();
+	int num_Turns;
 	if ((players_Ship.get_Evaded() == false) && (evade(enemys_Artillery[enemy_Choice].get_Accuracy() == false))) {
-		int remaining_Health = players_Ship.get_Current_Health() - enemys_Artillery[enemy_Choice].get_Damage();
+		int damage_Dealt = enemys_Artillery[enemy_Choice].get_Damage();
+		if (players_Ship.get_Weaken_Status() > 0) {
+			damage_Dealt *= 1.5;
+		}
+		int remaining_Health = players_Ship.get_Current_Health() - damage_Dealt;
 		players_Ship.set_Current_Health(remaining_Health);
 		cout << "The " << enemy_Ship.get_Name() << " fired their " << enemys_Artillery[enemy_Choice].get_Name()
-			<< " and dealt " << enemys_Artillery[enemy_Choice].get_Damage() << " damage " << endl;
+		<< " and dealt " << damage_Dealt << " damage " << endl;
+		if (enemys_Artillery[enemy_Choice].get_Can_Corrode()) {
+			if (can_Apply_Corrosion_Status(percent) > 0) {
+				players_Ship.set_Corrosion_Status();
+				cout << "they also have inflicted corrosion upon the " << players_Ship.get_Name() << endl;
+			}
+
+		}
+		else if (enemys_Artillery[enemy_Choice].get_Can_Weaken()) {
+			if (can_Apply_Weakened_Status(percent) > 0) {
+				num_Turns = random_Number(1, 2);
+				players_Ship.set_Weaken_Status(num_Turns);
+				cout << "and the " << players_Ship.get_Name() << " weakened your hull" << endl;
+			}
+		}
+		else if (enemys_Artillery[enemy_Choice].get_Can_Stun()) {
+			if (can_Apply_Stun_Status(percent) > 0) {
+				players_Ship.set_Stun_Status(2);
+				cout << "and stunned your ship's operating system" << endl;
+			}
+		}
+		
+		else if (enemys_Artillery[enemy_Choice].get_Can_Disrupt()) {
+			if (can_Apply_Disrupted_Status(percent) > 0) {
+				num_Turns = random_Number(3, 5);
+				players_Ship.set_Disrupted_Status(num_Turns);
+				cout << "and you disrupted your energy generator" << endl;
+			}
+		}
 	}
 	else {
 		cout << "The " << enemy_Ship.get_Name() << " fired their " << enemys_Artillery[enemy_Choice].get_Name()
-		<< ", however your ship managed to evade it " << endl;
+		<< ", but your ship managed to evade it " << endl;
 		players_Ship.set_Evaded(false);
+	}
+	if (enemys_Artillery[enemy_Choice].get_Can_Overheat()) {
+		if (enemys_Artillery[enemy_Choice].can_Apply_Overheat_Status(percent) > 0) {
+			num_Turns = random_Number(2, 3);
+			enemys_Artillery[enemy_Choice].set_Overheat_Status(num_Turns);
+			cout << "however, the " << enemy_Ship.get_Name() << "'s " << enemys_Artillery[enemy_Choice].get_Name() << " overheated" << endl;
+		}
 	}
 }
 
@@ -675,26 +905,25 @@ void enemy_Action(int enemy_Choice, ship& players_Ship, ship& enemy_Ship, vector
 
 
 int combat(ship& players_Ship, vector<artillery>& players_Artillery, int players_Inventory[], int enemy_Level, ship& enemy_Ship, vector<artillery>& enemys_Artillery) {
-	int max_Energy = players_Ship.get_Max_Energy();
-	players_Ship.set_Current_Energy(max_Energy);
+	players_Ship.set_Current_Energy(players_Ship.get_Max_Energy());
 	while (enemy_Ship.get_Current_Health() > 0) {
 		if (players_Ship.get_Current_Health() > 0) {
 			bool player_Choice_Loop = false;
 			int player_Choice;
+			
 			while (!player_Choice_Loop) {
-				print_Stats(players_Ship, enemy_Ship);
+				print_Stats(players_Ship, enemy_Ship, players_Artillery, enemys_Artillery);
 				print_Player_Options(players_Ship, players_Artillery);
 				player_Choice = read_User_Input(players_Ship, players_Artillery);
+
 				if (player_Choice == players_Artillery.size()) {
-					status_Codex();
 					system("cls");
+					status_Codex();
 				}
 				else {
 					player_Choice_Loop = true;
 				}
-
 			}
-			
 			int enemy_Choice = read_Enemy_Input(enemy_Ship, enemys_Artillery);
 			int players_Artillery_Accuracy = 0;
 			int enemys_Artillery_Accuracy  = 0;
@@ -704,49 +933,93 @@ int combat(ship& players_Ship, vector<artillery>& players_Artillery, int players
 			if (enemy_Choice > -1) {
 				enemys_Artillery_Accuracy = enemys_Artillery[enemy_Choice].get_Accuracy();
 			}
-			if (enemy_Choice == -1 || player_Choice == -1) {
+			if (player_Choice == -2 ^ enemy_Choice == -2) {
+				if (enemy_Ship.get_Current_Health() > 0) {
+					if (enemy_Choice > -1) {
+						enemy_Action(enemy_Choice, players_Ship, enemy_Ship, enemys_Artillery);
+						press_X_To_Continue_And_Clear();
+					}
+					else if (enemy_Choice == -1) {
+						enemy_Ship.evade_Action(players_Artillery_Accuracy);
+						press_X_To_Continue_And_Clear();
+					}
+					if (player_Choice > -1) {
+						user_Action(player_Choice, players_Ship, players_Artillery, enemy_Ship);
+						press_X_To_Continue_And_Clear();
+					}
+					else if (player_Choice == -1) {
+						players_Ship.evade_Action(enemys_Artillery_Accuracy);
+						press_X_To_Continue_And_Clear();
+					}
+					
+				}
+			}
+			else if (player_Choice == -2 && enemy_Choice == -2){
+				cout << "Both you and the " << enemy_Ship.get_Name() << " have been stunned, and neither of you could take any actions" << endl;
+				press_X_To_Continue_And_Clear();
+			}
+			else if (enemy_Choice == -1 || player_Choice == -1) {
 				bool first_Evade = false;
 				if (player_Choice == -1) {
-					players_Ship.evade_Action(enemys_Artillery_Accuracy);
+					players_Ship.evade_Action(0);
 					press_X_To_Continue();
-					first_Evade;
+					first_Evade = true;
 				}
 				if (enemy_Choice == -1) {
-					enemy_Ship.evade_Action(players_Artillery_Accuracy);
+					enemy_Ship.evade_Action(0);
 					if (first_Evade) {
 						press_X_To_Continue_And_Clear();
 					}
 					else {
 						press_X_To_Continue();
+
 					}
 				}
-				if (player_Choice != -1) {
+				if (player_Choice > -1) {
 					user_Action(player_Choice, players_Ship, players_Artillery, enemy_Ship);
 					press_X_To_Continue_And_Clear();
 				}
-				if (enemy_Choice != -1) {
+				if (enemy_Choice > -1) {
 					enemy_Action(enemy_Choice, players_Ship, enemy_Ship, enemys_Artillery);
 					press_X_To_Continue_And_Clear();
 				}
 			}
+			
 			else if (enemys_Artillery[enemy_Choice].get_Attack_Speed() > players_Artillery[player_Choice].get_Attack_Speed()){
 				cout << "The enemy's weapon speed was faster than yours, so they attacked you first" << endl;
 				press_X_To_Continue();
 				enemy_Action(enemy_Choice, players_Ship, enemy_Ship, enemys_Artillery);
 				press_X_To_Continue();
 				if (players_Ship.get_Current_Health() > 0) {
-					user_Action(player_Choice, players_Ship, players_Artillery, enemy_Ship);
-					press_X_To_Continue_And_Clear();
+					if (players_Ship.get_Stun_Status() <= 0) {
+						user_Action(player_Choice, players_Ship, players_Artillery, enemy_Ship);
+						press_X_To_Continue_And_Clear();
+					}
+					else {
+						cout << "The enemy stunned you before you could attack, so you were unable to fire any of your artillery" << endl;
+						press_X_To_Continue_And_Clear();
+					}
 				}
 			}
 			else {
 				user_Action(player_Choice, players_Ship, players_Artillery, enemy_Ship);
 				press_X_To_Continue();
 				if (enemy_Ship.get_Current_Health() > 0) {
-					enemy_Action(enemy_Choice, players_Ship, enemy_Ship, enemys_Artillery);
-					press_X_To_Continue_And_Clear();
+					if (enemy_Ship.get_Stun_Status() <= 0) {
+						enemy_Action(enemy_Choice, players_Ship, enemy_Ship, enemys_Artillery);
+						press_X_To_Continue_And_Clear();
+					}
+					else {
+						cout << "You stunned the enemy before they were able to attack" << endl;
+						press_X_To_Continue_And_Clear();
+					}
+					
 				}
 			}
+			status_Effect_Actions(enemy_Ship, enemys_Artillery);
+			system("cls");
+			status_Effect_Actions(players_Ship, players_Artillery);
+			system("cls");
 		}
 		else {
 			cout << "GAME OVER, YOU DIED" << endl;
@@ -759,14 +1032,17 @@ int combat(ship& players_Ship, vector<artillery>& players_Artillery, int players
   }
 
 //depot
-void add_Artillery1(vector<artillery>& artillery_For_Purchase) {
-	artillery_For_Purchase.push_back(artillery("stasis cannon", 25, 85, 95, 15, 10, false, true, false, false, 1, "40% to stun"));
+void add_Artillery1(vector<artillery>& artillery_Vector) {
+	artillery_Vector.push_back(artillery("graviton corroder", 30, 60, 35, 10, 20, true, false, false, false, false, 30, 0, "30% to corrosion"));
 }
-void add_Artillery2(vector<artillery>& artillery_For_Purchase) {
-	artillery_For_Purchase.push_back(artillery("voidpeircer", 15, 85, 95, 12, 10, false, false, true, false, 2, "50% to weaken"));
+void add_Artillery2(vector<artillery>& artillery_Vector) {
+	artillery_Vector.push_back(artillery("stasis cannon", 25, 85, 95, 15, 10, false, true, false, false, false, 40, 1, "40% to stun"));
 }
-void add_Artillery3(vector<artillery>& artillery_For_Purchase) {
-	artillery_For_Purchase.push_back(artillery("star breaker", 65, 75, 15, 7, 35, false, false, false, true, 3, "25% to overheat"));
+void add_Artillery3(vector<artillery>& artillery_Vector) {
+	artillery_Vector.push_back(artillery("voidpeircer", 15, 85, 95, 12, 10, false, false, true, false, false, 50, 2, "50% to weaken"));
+}
+void add_Artillery4(vector<artillery>& artillery_Vector) {
+	artillery_Vector.push_back(artillery("star breaker", 65, 75, 15, 7, 35, false, false, false, true, false, 25, 3, "25% to overheat"));
 }
 
 
@@ -1261,6 +1537,7 @@ int starship_Depot(ship players_Ship, vector<artillery>& players_Artillery, vect
 					players_Ship.set_Current_Health(players_Ship.get_Current_Health() + 1);
 				}
 				cout << "You repaired your ship for " << heal_Option << " health!" << endl;
+				players_Ship.cure_Corrosive();
 				press_X_To_Continue_And_Clear();
 				heal_Option = players_Ship.heal_Options(player_Inventory);
 			}
@@ -1302,8 +1579,7 @@ string pick_Name() {
 
 int main() {
 	int players_Inventory[4] = {32, 32, 32, 10};
-	vector<artillery> artillery_For_Purchase = {
-	artillery("graviton corroder", 30, 60, 35, 10, 20, true, false, false, false, 0, "None") };
+	vector<artillery> artillery_For_Purchase;
 	/*
 	Stellar Debris (Common), Nebula Shards (Uncommon), Quantum Cores (Rare), Dark Matter Essence (very rare)
 	// name, damage, accuracy, attack_Speed, max_Uses, energy_Cost, is_EMP, is_Pulse_Disruptor, is_Plasma_Overload);
@@ -1313,32 +1589,35 @@ int main() {
 	ship players_Ship(user_Name, 50, 50, 10, 10);
 	//name , health, energy, evasiveness, energy regen
 	vector<artillery> players_Artillery = {
-	artillery( "basic artillery", 15, 95, 50, 30, 5, false, false, false, false, 0, "None") };
-	// name, damage, accuracy, attack_Speed, max_Uses, energy_Cost, is_EMP, is_Pulse_Disruptor, is_Plasma_Overload);
-	
+	artillery( "basic artillery", 15, 95, 50, 30, 5, false, false, false, true, false, 10, 0, "10% to overheat") };
+	// artillery(string name, int damage, int accuracy, int attack_Speed, int max_Uses, int energy_Cost, bool can_Corrode, bool can_Stun, bool can_Weaken, bool can_Overheat, bool can_Disrupt, int percent, int ammo_Quality, string ability_Name);
 	
 	//fight 1, level 1 
 	ship enemy_Ship1("Space pirate ship", 35, 20, 15, 25);
 	vector<artillery> enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, 0, " ") };
+	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, true, false, 0, 0, " ") };
+
+	
+
 	combat(players_Ship, players_Artillery, players_Inventory, 1, enemy_Ship1, enemys_Artillery);
+	add_Artillery1(artillery_For_Purchase);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
 	
 	//fight2, level 1
 	ship enemy_Ship2("Astro bandit", 35, 20, 15, 25);
 	enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, 0, " ")};
+	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
 	combat(players_Ship, players_Artillery, players_Inventory, 1, enemy_Ship2, enemys_Artillery);
 	enemys_Artillery.clear();
 
 	//fight 3, level 1
 	ship enemy_Ship3("Scavenger", 35, 20, 15, 25);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, 0, " ") };
+	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
 	combat(players_Ship, players_Artillery, players_Inventory, 1, enemy_Ship3, enemys_Artillery);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
@@ -1349,16 +1628,16 @@ int main() {
 	add_Artillery1(artillery_For_Purchase);
 	ship enemy_Ship4("Enforcer", 35, 20, 15, 25);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, 0, " ") };
+	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
 	combat(players_Ship, players_Artillery, players_Inventory, 2, enemy_Ship4, enemys_Artillery);
 	enemys_Artillery.clear();
 
 	//fight 2, level 2
 	ship enemy_Ship5("Starbane Raider", 35, 20, 15, 25);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, 0, " ") };
+	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
 	combat(players_Ship, players_Artillery, players_Inventory, 2, enemy_Ship5, enemys_Artillery);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
@@ -1366,8 +1645,8 @@ int main() {
 	//fight 2, level 2
 	ship enemy_Ship6("Scourge", 35, 20, 15, 25);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, 0, " ") };
+	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
 	combat(players_Ship, players_Artillery, players_Inventory, 2, enemy_Ship6, enemys_Artillery);
 	enemys_Artillery.clear();
 
@@ -1376,8 +1655,8 @@ int main() {
 	add_Artillery2(artillery_For_Purchase);
 	ship enemy_Ship7("Eclipse Marauder", 35, 20, 15, 25);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, 0, " ") };
+	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
 	combat(players_Ship, players_Artillery, players_Inventory, 2, enemy_Ship7, enemys_Artillery);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
@@ -1385,16 +1664,16 @@ int main() {
 	//fight 2, level 3
 	ship enemy_Ship8("Tempest", 35, 20, 15, 25);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, 0, " ") };
+	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
 	combat(players_Ship, players_Artillery, players_Inventory, 3, enemy_Ship8, enemys_Artillery);
 	enemys_Artillery.clear();
 
 	//fight 3, level 3
 	ship enemy_Ship9("Space Vultures", 35, 20, 15, 25);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, 0, " ") };
+	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
 	combat(players_Ship, players_Artillery, players_Inventory, 3, enemy_Ship9, enemys_Artillery);
 	enemys_Artillery.clear();
 
@@ -1402,8 +1681,8 @@ int main() {
 	//fight 1, level 4
 	ship enemy_Ship10("Nightmare", 35, 20, 15, 25);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, 0, " ") };
+	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
 	combat(players_Ship, players_Artillery, players_Inventory, 4, enemy_Ship10, enemys_Artillery);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
@@ -1411,8 +1690,8 @@ int main() {
 	//fight 2, level 4
 	ship enemy_Ship11("Star Hunters", 35, 20, 15, 25);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, 0, " ") };
+	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
 	combat(players_Ship, players_Artillery, players_Inventory, 4, enemy_Ship11, enemys_Artillery);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
@@ -1420,8 +1699,8 @@ int main() {
 	//fight 3, level 4
 	ship enemy_Ship12("Shadow Dread", 35, 20, 15, 25);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, 0, " ") };
+	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
 	combat(players_Ship, players_Artillery, players_Inventory, 4, enemy_Ship12, enemys_Artillery);
 	enemys_Artillery.clear();
 	
@@ -1430,16 +1709,16 @@ int main() {
 	add_Artillery3(artillery_For_Purchase);
 	ship enemy_Ship13("Raptor", 35, 20, 15, 25);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, 0, " ") };
+	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
 	combat(players_Ship, players_Artillery, players_Inventory, 5, enemy_Ship13, enemys_Artillery);
 	enemys_Artillery.clear();
 
 	//fight 2, level 5
 	ship enemy_Ship14("Galactic Prowler", 35, 20, 15, 25);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, 0, " ") };
+	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
 	combat(players_Ship, players_Artillery, players_Inventory, 5, enemy_Ship14, enemys_Artillery);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
@@ -1447,8 +1726,8 @@ int main() {
 	//fight 3, level 5
 	ship enemy_Ship15("Starborn menace", 35, 20, 15, 25);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, 0, " ") };
+	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
 	combat(players_Ship, players_Artillery, players_Inventory, 5, enemy_Ship15, enemys_Artillery);
 	enemys_Artillery.clear();
 
@@ -1456,8 +1735,8 @@ int main() {
 	//fight 1, level 6
 	ship enemy_Ship16("Celestial predator", 35, 20, 15, 25);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, 0, " ") };
+	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
 	combat(players_Ship, players_Artillery, players_Inventory, 6, enemy_Ship16, enemys_Artillery);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
@@ -1465,16 +1744,16 @@ int main() {
 	//fight 2 level 6
 	ship enemy_Ship17("Dreadnought", 35, 20, 15, 25);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, 0, " ") };
+	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
 	combat(players_Ship, players_Artillery, players_Inventory, 6, enemy_Ship17, enemys_Artillery);
 	enemys_Artillery.clear();
 
 	//fight 3, level 6
 	ship enemy_Ship18("Void Stalker", 35, 20, 15, 25);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, 0, " ") };
+	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
 	combat(players_Ship, players_Artillery, players_Inventory, 6, enemy_Ship18, enemys_Artillery);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();

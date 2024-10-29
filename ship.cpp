@@ -1,4 +1,6 @@
+using namespace std;
 #include "ship.h"
+
 
 ship::ship(string name, int max_Health, int max_Energy, int evasiveness, int energy_Regen) {
 
@@ -54,19 +56,26 @@ void ship::set_Evaded(bool evaded) {
 }
 
 void ship::set_Weaken_Status(int num_Turns) {
-	status_Effects[2] = num_Turns;
-}
-void ship::set_Overheat_Status(int num_Turns) {
-	status_Effects[3] = num_Turns;
+	this->status_Effects[2] = num_Turns;
 }
 void ship::set_Stun_Status(int num_Turns) {
-	status_Effects[1] = num_Turns;
+	this->status_Effects[1] = num_Turns;
 }
-void ship::set_Corrosion_Status(int num_Turns) {
-	status_Effects[0] = num_Turns;
+
+void ship::set_Corrosion_Status() {
+	if (status_Effects[0] == 0) {
+		status_Effects[0] += 1;
+	}
+	else {
+		status_Effects[0] *= 2;
+	}
+	
+}
+void ship::cure_Corrosive() {
+	status_Effects[0] = 0;
 }
 void ship::set_Disrupted_Status(int num_Turns) {
-	status_Effects[4] = num_Turns;
+	this->status_Effects[3] = num_Turns;
 }
 
 void ship::set_Hull_Level(int level) {
@@ -96,6 +105,7 @@ void ship::set_Nuclear_Reactor_Level(int level) {
 	}
 }
 
+
 //getters
 int ship::get_Max_Health() {
 	return max_Health;
@@ -116,6 +126,7 @@ int ship::get_Energy_Regen() {
 	return energy_Regen;
 }
 
+
 string ship::get_Name() {
 	return name;
 }
@@ -123,9 +134,7 @@ string ship::get_Name() {
 int ship::get_Weaken_Status() {
 	return status_Effects[2];
 }
-int ship::get_Overheat_Status() {
-	return status_Effects[3];
-}
+
 int ship::get_Stun_Status() {
 	return status_Effects[1];
 }
@@ -133,8 +142,12 @@ int ship::get_Corrode_Status() {
 	return status_Effects[0];
 }
 int ship::get_Disrupted_Status() {
-	return status_Effects[4];
+	return status_Effects[3];
 }
+int* ship::get_All_Statuses() {
+	return status_Effects;
+}
+
 
 bool ship::get_Evaded() {
 	return evaded;
@@ -166,7 +179,7 @@ int* ship::get_All_Levels() {
 
 // artillery class info
 
-artillery::artillery( string name, int damage, int accuracy, int attack_Speed, int max_Uses, int energy_Cost, bool can_Corrode, bool can_Stun, bool can_Weaken, bool can_Overheat, int ammo_Quality, string ability_Name) {
+artillery::artillery( string name, int damage, int accuracy, int attack_Speed, int max_Uses, int energy_Cost, bool can_Corrode, bool can_Stun, bool can_Weaken, bool can_Overheat, bool can_Disrupt, int percent, int ammo_Quality, string ability_Name) {
 	
 	set_Name(name);
 	set_Damage(damage);
@@ -178,11 +191,17 @@ artillery::artillery( string name, int damage, int accuracy, int attack_Speed, i
 	set_Can_Overheat(can_Overheat);
 	set_Can_Weaken(can_Weaken);
 	set_Can_Stun(can_Stun);
+	set_Can_Disrupt(can_Disrupt);
+	set_Can_Corrode(can_Corrode);
 	set_Ammo_Quality(ammo_Quality);
 	set_Ability_Name(ability_Name);
+	set_Percent(percent);
 }
 
 //getters
+int artillery::get_Percent() {
+	return percent;
+}
 int artillery::get_Damage() {
 	return damage;
 }
@@ -207,10 +226,30 @@ int artillery::get_Ammo_Quality() {
 string artillery::get_Name() {
 	return name;
 }
+
+
 string artillery::get_Ability_Name() {
 	return ability_Name;
 }
+bool artillery::get_Can_Corrode() {
+	return can_Corrode;
+}
+bool artillery::get_Can_Disrupt() {
+	return can_Disrupt;
+}
+bool artillery::get_Can_Overheat() {
+	return can_Overheat;
+}
+bool artillery::get_Can_Weaken() {
+	return can_Weaken;
+}
+bool artillery::get_Can_Stun() {
+	return can_Stun;
+}
 
+int artillery::get_Overheat_Status() {
+	return overheat_Status;
+}
 //setters
 void artillery::set_Ability_Name(string ability_Name) {
 	if (!ability_Name.empty()) {
@@ -252,6 +291,16 @@ void artillery::set_Energy_Cost(int energy_Cost) {
 		this->energy_Cost = energy_Cost;
 	}
 }
+void artillery::set_Percent(int percent) {
+	if (percent >= 0) {
+		this->percent = percent;
+	}
+}
+
+void artillery::set_Overheat_Status(int num_Turns) {
+	overheat_Status = num_Turns;
+}
+
 void artillery::set_Can_Stun(bool can_Stun) {
 	this->can_Stun = can_Stun;
 }
@@ -259,12 +308,16 @@ void artillery::set_Can_Weaken(bool can_Weaken) {
 	this->can_Weaken = can_Weaken;
 }
 void artillery::set_Can_Overheat(bool can_Overheat) {
-	this->can_Overload = can_Overload;
+	this->can_Overheat = can_Overheat;
 }
 void artillery::set_Can_Corrode(bool can_Corrode) {
 	this->can_Corrode = can_Corrode;
 	
 }
+void artillery::set_Can_Disrupt(bool can_Disrupt) {
+	this->can_Disrupt = can_Disrupt;
+}
+
 void artillery::set_Ammo_Quality(int ammo_Quality) {
 	if (ammo_Quality >= 0 && ammo_Quality < 4) {
 		this->ammo_Quality = ammo_Quality;
