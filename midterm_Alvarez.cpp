@@ -815,7 +815,7 @@ int read_Enemy_Input(ship& enemy_Ship, vector<artillery>& enemys_Artillery, ship
 	while (!valid) {
 		int max = 0;
 		int max_I;
-		if (players_Ship.get_Weaken_Status() > 0) {
+		if (players_Ship.get_Weaken_Status() > 0 || players_Ship.get_Stun_Status() > 0) {
 			for (int i = 0; i < enemys_Artillery.size(); i++){
 				
 				if (enemys_Artillery[i].get_Damage() > max) {
@@ -891,13 +891,13 @@ void enemy_Action(int enemy_Choice, ship& players_Ship, ship& enemy_Ship, vector
 			if (can_Apply_Weakened_Status(percent) > 0) {
 				num_Turns = random_Number(1, 2);
 				players_Ship.set_Weaken_Status(num_Turns);
-				cout << "and the " << players_Ship.get_Name() << " weakened your hull" << endl;
+				cout << "the " << enemy_Ship.get_Name() << " has also weakened your hull" << endl;
 			}
 		}
 		else if (enemys_Artillery[enemy_Choice].get_Can_Stun()) {
 			if (can_Apply_Stun_Status(percent) > 0) {
 				players_Ship.set_Stun_Status(2);
-				cout << "and stunned your ship's operating system" << endl;
+				cout << "the " << enemy_Ship.get_Name() << " stunned your ship's operating system" << endl;
 			}
 		}
 		
@@ -905,7 +905,7 @@ void enemy_Action(int enemy_Choice, ship& players_Ship, ship& enemy_Ship, vector
 			if (can_Apply_Disrupted_Status(percent) > 0) {
 				num_Turns = random_Number(3, 5);
 				players_Ship.set_Disrupted_Status(num_Turns);
-				cout << "and you disrupted your energy generator" << endl;
+				cout << "the " << enemy_Ship.get_Name() << " disrupted your energy generator" << endl;
 			}
 		}
 	}
@@ -943,6 +943,7 @@ int combat(ship& players_Ship, vector<artillery>& players_Artillery, int players
 				if (player_Choice == players_Artillery.size()) {
 					system("cls");
 					status_Codex();
+					system("cls");
 				}
 				else {
 					player_Choice_Loop = true;
@@ -1057,16 +1058,17 @@ int combat(ship& players_Ship, vector<artillery>& players_Artillery, int players
 
 //depot
 void add_Artillery1(vector<artillery>& artillery_Vector) {
-	artillery_Vector.push_back(artillery("Graviton Corroder", 30, 60, 35, 10, 20, true, false, false, false, false, 30, 0, "30% to corrosion"));
+	artillery_Vector.push_back(artillery("Stasis Cannon", 25, 85, 95, 15, 10, false, true, false, false, false, 40, 0, "40% to stun"));
 }
 void add_Artillery2(vector<artillery>& artillery_Vector) {
-	artillery_Vector.push_back(artillery("Stasis Cannon", 25, 85, 95, 15, 10, false, true, false, false, false, 40, 1, "40% to stun"));
+	
+	artillery_Vector.push_back(artillery("Graviton Corroder", 40, 75, 35, 10, 20, true, false, false, false, false, 30, 1, "30% to corrosion"));
 }
 void add_Artillery3(vector<artillery>& artillery_Vector) {
-	artillery_Vector.push_back(artillery("Voidpeircer", 15, 85, 95, 12, 10, false, false, true, false, false, 50, 2, "50% to weaken"));
+	artillery_Vector.push_back(artillery("Void Piercer", 20, 85, 95, 10, 15, false, false, true, false, false, 65, 2, "65% to weaken"));
 }
 void add_Artillery4(vector<artillery>& artillery_Vector) {
-	artillery_Vector.push_back(artillery("Star Breaker", 65, 75, 15, 7, 35, false, false, false, true, false, 25, 3, "25% to overheat"));
+	artillery_Vector.push_back(artillery("Energy Ripper", 65, 75, 15, 5, 35, false, false, false, false, true , 35, 3, "35% to disrupt"));
 }
 
 
@@ -1331,7 +1333,7 @@ int ship::heal_Options(int player_Inventory[]) {
 	cout << "Health: " << get_Current_Health() << "/" << get_Max_Health() << endl;
 	int missing_Health = get_Max_Health() - get_Current_Health();
 	cout << "0. BACK" << endl;
-	if (missing_Health > repair_Teirs[0]) {
+	if (missing_Health >= repair_Teirs[0]) {
 		for (int i = 0; i < 6 && missing_Health >= repair_Teirs[i]; i++) {
 			max_Repair_Teir = i + 1;
 			if (i < 3) {
@@ -1421,8 +1423,8 @@ int ammo_Options(vector<artillery>& players_Artillery, int player_Inventory[]) {
 	for (int i = 0; i < players_Artillery.size(); i++){
 		cout << i + 1 << ". " << players_Artillery[i].get_Name() << " ammunition " << endl;
 		missing_Ammo = players_Artillery[i].get_Max_Uses() - players_Artillery[i].get_Current_Uses();
-		accurate_Price = missing_Ammo / (2 + players_Artillery[i].get_Ammo_Quality());
-		if (accurate_Price < 0 && accurate_Price < 1) {
+		accurate_Price = missing_Ammo / (2.00 + players_Artillery[i].get_Ammo_Quality());
+		if (accurate_Price > 0 && accurate_Price < 1) {
 			accurate_Price = 1;
 		}
 		price[players_Artillery[i].get_Ammo_Quality()] = accurate_Price;
@@ -1762,20 +1764,239 @@ void story_Part5() {
 	press_X_To_Continue_And_Clear();
 }
 void story_Part6() {
+	cout << "You bring your ship down on a dusty, isolated colony planet, weary from the recent battles. " << endl;
+	press_X_To_Continue();
+	cout << "As you dock in a makeshift landing bay, the hum of life and chatter fills the air, a relief after the empty void of space." << endl;
+	press_X_To_Continue();
+	cout << "You disembark and make your way to a dimly lit inn on the edge of the port, hoping for a night's rest." << endl;
+	press_X_To_Continue();
+	cout << "Inside, locals fill the small, worn out bar area, their faces weathered by long days and hard lives. " << 
+		endl << "As you settle down, fragments of their conversation catch your attention." << endl;
+	press_X_To_Continue();
+	cout << "'The UCA's supposed to protect us,' a voice says bitterly, 'but look around. Pirate attacks are worse than ever.'" << endl;
+	press_X_To_Continue();
+	cout << "A man scoffs in response. 'Protection's for those who can afford it. It costs a fortune to get a colony into the UCA's ranks now. " << 
+		endl <<  "They raised the fare again, double what it was last year.'" << endl;
+	press_X_To_Continue();
+	cout << "'Guess they don't mind letting the rest of us fend for ourselves,' the first voice mutters." << endl;
+	press_X_To_Continue();
+	cout << "A younger voice pipes up. 'Do you think it's because the pirates are more powerful now? Feels like they have better gear every time they hit us.'" << endl;
+	press_X_To_Continue();
+	cout << "The conversation falls silent as they exchange uneasy looks, a question left unspoken in the air." << endl;
+	press_X_To_Continue();
+	cout << "You take it all in, a knot forming in your stomach. " << endl;
+	press_X_To_Continue();
+	cout << "But you brush it aside, weariness catching up with you. You find a small room, the worn cot a welcome sight." << endl;
+	press_X_To_Continue();
+	cout << "As you sink into bed, the conversations echo in your mind. " << endl;
+	press_X_To_Continue_And_Clear();
 
+	cout << "When you wake the next morning, the voices from last night linger in your mind. " << endl;
+	press_X_To_Continue();
+	cout << "You sit in the inn's small dining area, picking at a basic meal." << endl;
+	press_X_To_Continue();
+	cout << "The fragments of conversation, pirates growing stronger, the UCA's raised fees, defenseless colonies, churn in your thoughts, but so does something else, a nagging question of purpose." <<
+		endl << "The anger you felt yesterday has cooled, replaced by a quiet exhaustion. You've taken down pirates, one by one, ship by ship, but for what? " << endl;
+	press_X_To_Continue();
+	cout << "The problem feels bigger than any one person could solve. Part of you wonders if any of this will make a difference, " << 
+		endl << "if taking on these battles alone is worth it." << endl;
+	press_X_To_Continue();
+	cout << "But then you remember New Castra, once a place full of life, now left in ashes." << endl;
+	press_X_To_Continue();
+	cout << "With a deep breath, you finish your meal, your resolve hardening." << endl;
+	press_X_To_Continue();
+	cout << "No matter how powerful these pirates have become, you can't stand by while innocent colonies are left at their mercy. " << 
+		endl << "You head back to your ship, determined to press on, one battle at a time." << endl;
+	press_X_To_Continue();
 }
 void story_Part7() {
+	cout << "After defeating the last pirate ship in the sector, your comms light up with a scrambled message. " << 
+		endl << "You piece together what you can from the encrypted signal, and a series of phrases become clear: " << endl;
+	press_X_To_Continue();
+	cout << "a larger faction congratulating their underlings, and a directive to 'await the next delivery.'" << endl;
+	press_X_To_Continue();
+	cout << "The message details a specific exchange point in a remote system and uses a coded phrase, one you've seen before in UCA protocols. " << endl;
+	press_X_To_Continue();
+	cout << "Suspicion knots in your stomach, and curiosity pulls you to set course for the meeting." << endl;
+	press_X_To_Continue();
+	cout << "You arrive at the exchange location, hiding your ship behind an asteroid field as a convoy of large UCA vessels approaches. " << endl;
+	press_X_To_Continue();
+	cout << "Holding your breath, you watch as the ships lower their cargo bays, and a small fleet of pirate ships drifts in from the other side." << endl;
+	press_X_To_Continue();
+	cout << "The pirates dock seamlessly, as if this exchange were nothing out of the ordinary." << endl;
+	press_X_To_Continue();
+	cout << "From your vantage point, you see UCA officers, dressed in standard uniforms, unloading crates." << 
+		endl << "Marked with the UCA insignia, the crates contain advanced weaponry, fuel cells, and high grade armor. " << endl;
+	press_X_To_Continue();
+	cout << "The officers work in silence, handing the supplies over to the pirates, who accept them with practiced ease, as if they'd done this countless times before." << endl;
+	press_X_To_Continue();
+	cout << "A cold realization settles over you. This isn't negligence or a few rogue elements, this is a deliberate supply chain. " << endl;
+	press_X_To_Continue();
+	cout << "The UCA isn't struggling to fight the pirates, they're supplying them. " << endl;
+	press_X_To_Continue();
+	cout << "They're orchestrating this entire threat, pushing colonies to their limits, all to tighten their grip under the guise of 'protection.'" << endl;
+	press_X_To_Continue();
+	cout << "A surge of anger rushes through you. " << endl;
+	press_X_To_Continue();
+	cout << "The organization that's supposed to protect these worlds has betrayed them," << 
+		endl << " creating the very danger they claim to defend against." << endl;
+	press_X_To_Continue();
 
+	cout << "Watching the last of the crates exchange hands, you power up and surge forward.The pirate ship darts away into the shadows, but the UCA vessel stays, its turrets locking onto you." << endl;
+	press_X_To_Continue();
+	cout << "'Traitors, ' you grit, tightening your grip on the controls. The UCA ship charges its weapons." << endl;
+	press_X_To_Continue_And_Clear();
+	
+
+
+	
+
+		
  }
-void story_Part8() {
+void story_Part9() {
+	cout << "Shaken by what you just witnessed, you set a course to the nearest planet, desperate to put distance between yourself and the UCA's dark dealings." << 
+		endl <<" Your mind spins with questions, but exhaustion weighs on you, and you land in a small, quiet colony on the planet's surface." << endl;
+	press_X_To_Continue();
+	cout << "As you disembark, you notice the people here look worn and gaunt, their clothing faded, eyes downcast as they work on rough machinery, " << 
+		endl << "lifting heavy loads or shoveling soil into drying fields. You approach a nearby worker, an older man with hollow cheeks and calloused hands." << endl;
+	press_X_To_Continue();
+	cout << "He looks at you cautiously, but there's a flicker of curiosity in his eyes. 'You're new here, aren't you?' he asks quietly." << endl;
+	press_X_To_Continue();
+	cout << "You nod, and he glances around to make sure no one is listening before speaking. " << endl;
+	press_X_To_Continue();
+	cout << "'We used to be happy here. Independent, thriving in our own way. But th... the pirate attacks started." << 
+		endl << " More raids than we'd ever seen. The UCA offered protection, but the fee was high, higher than we could afford.' " << endl;
+	press_X_To_Continue();
+	cout << "We joined because we had no choice, but now...' He gestures to the weary people around you." << endl;
+	press_X_To_Continue();
+	cout << "'We work like this, day and night, just to pay off the debt.'" << endl;
+	press_X_To_Continue();
+	cout << "Another worker overhears and steps over, a young woman with a sunken face. 'The UCA demands a heavy price for its protection, " << 
+		endl << "and what little we earn goes to pay off the admission cost. It's as if they own us now.'" << endl;
+	press_X_To_Continue();
+	cout << "The older man nods grimly, then offers a sad smile. 'Still, we're not without kindness. You look like you need rest. Come, there's a place for you to sleep tonight, though it isn't much.'" << endl;
+	press_X_To_Continue();
+	cout << "Grateful, you follow them to a small, bare room, the floor covered with a simple mat. " << 
+		endl << "As you lie down, their words echo in your mind. The UCA wasn't just protecting this colony," << 
+		endl << " they were exploiting it, tightening their grip on every world they 'saved.' You close your eyes," << 
+		endl << " but sleep doesn't come easily. " << endl;
+	press_X_To_Continue_And_Clear();
 
 }
-void story_Part9() {
-
+void story_Part8() {
+	cout << "You gun the engines, pushing your ship to its limits as you pursue the fleeing pirate vessels." << endl;
+	press_X_To_Continue();
+	cout << "It darts through asteroid fields and around shattered moon fragments, but you stay on its tail, your targeting systems locking in." << endl;
+	press_X_To_Continue_And_Clear();
+	
 }
 void story_Part10() {
+	cout << "Fueled by everything you've witnessed, you set a course straight for UCA territory, intent on making them answer for their treachery." <<
+			endl << " You navigate through their patrols undetected, inching closer to the UCA capital with every lightyear." << endl;
+	press_X_To_Continue();
+	cout << "Finally, the capital looms ahead, a fortress of influence and power. " << endl;
+	press_X_To_Continue();
+	cout << "But before you can get any closer, an imposing UCA vessel appears, bristling with advanced weaponry. Its turrets lock onto you, engines humming with lethal energy." << endl;
+	press_X_To_Continue();
+	cout << "You take a steadying breath and grip the controls." << endl;
+	press_X_To_Continue();
+	cout << "There's no going back now. With resolve hardening, you prepare for a fight against the heart of the UCA's defenses." << endl;
+	press_X_To_Continue_And_Clear();
+}
+void story_Part11() {
+	cout << "Determined to inflict as much  destruction as you can to the heart of the UCA, you engage full thrusters and dive toward the nearest patrols." << endl;
+	press_X_To_Continue();
+	cout << "Your weapons hum to life as you open fire on nearby ships" << endl;
+	press_X_To_Continue_And_Clear();
+	
 
 }
+void story_Part12() {
+	cout << "After tearing through the last of the UCA ships, you dock near the heart of their headquarters, determined to get answers." << endl;
+	press_X_To_Continue();
+	cout << "Moving stealthily, you slip past guards and security checkpoints until you reach an imposing door." << endl;
+	press_X_To_Continue();
+	cout << "Inside, voices echo, someone is discussing the chaos you've caused, how your actions have shaken the UCA." << endl;
+	press_X_To_Continue();
+	cout << "Without hesitation, you burst into the room, finding yourself face to face with the UCA's Grand Director." << endl;
+	press_X_To_Continue();
+	cout << "He turns, surprised yet strangely amused, showing no fear." << endl;
+	press_X_To_Continue();
+	cout << "You demand an explanation, why has he fueled such suffering, empowered pirates, and brought colonies to their knees?" << endl;
+	press_X_To_Continue();
+	cout << "With a smug smile, he leans back, almost bored by your anger." << endl;
+	press_X_To_Continue();
+	cout << "'Ah, well,' he says, 'it's simply a matter... luxury.'" << endl;
+	press_X_To_Continue();
+	cout << "'There's something I've had my eye on. Very exclusive. Quite costly, really.'" << endl;
+	press_X_To_Continue();
+	cout << "Your fists clench, incredulously. " << endl;
+	press_X_To_Continue();
+	cout << "'What could possibly be so valuable that you'd justify all this destruction?'" << endl;
+	press_X_To_Continue();
+	cout << "He smirks." << endl;
+	press_X_To_Continue();
+	cout << "'A toilet,' he replies calmly." << endl;
+	press_X_To_Continue_And_Clear();
+
+}
+
+void the_End() {
+	cout << "Congratulations, you won. Thanks for playing my game." << endl;
+	cout << "Written and produced by Tristan Alvarez" << endl;
+	press_X_To_Continue_And_Clear();
+}
+
+void demo() {
+	int players_Inventory[4] = { 30, 30, 30, 10 };
+	vector<artillery> artillery_For_Purchase;
+	/*
+	Stellar Debris (Common), Nebula Shards (Uncommon), Quantum Cores (Rare), Dark Matter Essence (very rare)
+	// name, damage, accuracy, attack_Speed, max_Uses, energy_Cost, is_EMP, is_Pulse_Disruptor, is_Plasma_Overload);
+	*/
+
+	//story_Part1();
+	string user_Name = pick_Name();
+	//story_Part2();
+
+	ship players_Ship(user_Name, 50, 50, 10, 10);
+	//name , health, energy, evasiveness, energy regen
+	vector<artillery> players_Artillery = {
+	artillery("Basic Artillery", 15, 95, 60, 30, 5, false, false, false, true, false, 10, 0, "10% to overheat") };
+	// artillery(string name, int damage, int accuracy, int attack_Speed, int max_Uses, int energy_Cost, bool can_Corrode, bool can_Stun, bool can_Weaken, bool can_Overheat, bool can_Disrupt, int percent, int ammo_Quality, string ability_Name);
+
+	add_Artillery1(players_Artillery);
+	add_Artillery2(players_Artillery);
+	add_Artillery3(players_Artillery);
+	add_Artillery4(players_Artillery);
+
+
+
+	//fight 1, level 1 
+	ship enemy_Ship1("Space pirate ship", 35, 20, 15, 25);
+	vector<artillery> enemys_Artillery = {
+	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, true, false, 0, 0, " ") };
+
+	combat(players_Ship, players_Artillery, players_Inventory, 1, enemy_Ship1, enemys_Artillery);
+	//story_Part3(players_Inventory);
+
+	
+	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
+	enemys_Artillery.clear();
+
+	ship enemy_Ship12("Nightmare", 95, 55, 40, 15);
+	enemys_Artillery = {
+   artillery("Veil Cannon", 10, 100, 20, 10, 1, false, false, false, true, false, 50, 0, " "),
+   artillery("Night's Wrath", 30, 90, 60, 2, 20, false, false, true, false, true, 50, 0, " "),
+   artillery("Talon", 20, 60, 60, 10, 10, false, true, false, false, false, 30, 0, " ") };
+	loading_Screen("Flying through space");
+	intermittent_Text();
+	combat(players_Ship, players_Artillery, players_Inventory, 4, enemy_Ship12, enemys_Artillery);
+	enemys_Artillery.clear();
+	
+}
+
 
 int main() {
 	int players_Inventory[4] = {0, 0, 0, 0};
@@ -1784,16 +2005,17 @@ int main() {
 	Stellar Debris (Common), Nebula Shards (Uncommon), Quantum Cores (Rare), Dark Matter Essence (very rare)
 	// name, damage, accuracy, attack_Speed, max_Uses, energy_Cost, is_EMP, is_Pulse_Disruptor, is_Plasma_Overload);
 	*/
-	
-	//story_Part1();
+	//demo();
+	story_Part1();
 	string user_Name = pick_Name();
-	//story_Part2();
+	story_Part2();
 
 	ship players_Ship(user_Name, 50, 50, 10, 10);
 	//name , health, energy, evasiveness, energy regen
 	vector<artillery> players_Artillery = {
 	artillery( "Basic Artillery", 15, 95, 60, 30, 5, false, false, false, true, false, 10, 0, "10% to overheat") };
 	// artillery(string name, int damage, int accuracy, int attack_Speed, int max_Uses, int energy_Cost, bool can_Corrode, bool can_Stun, bool can_Weaken, bool can_Overheat, bool can_Disrupt, int percent, int ammo_Quality, string ability_Name);
+	
 	
 	//fight 1, level 1 
 	ship enemy_Ship1("Space pirate ship", 35, 20, 15, 25);
@@ -1803,6 +2025,7 @@ int main() {
 
 	combat(players_Ship, players_Artillery, players_Inventory, 1, enemy_Ship1, enemys_Artillery);
 	story_Part3(players_Inventory);
+
 	add_Artillery1(artillery_For_Purchase);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
@@ -1817,8 +2040,8 @@ int main() {
 
 	//fight 3, level 1
 	ship enemy_Ship3("Scavenger", 85, 30, 5, 65);
-	 enemys_Artillery = {
-	artillery("Energy disruptor", 15, 90, 70, 10, 10, false, false, false, false, true, 50, 0, " ") };
+	enemys_Artillery = {
+	artillery("Phase disruptor", 15, 90, 70, 10, 10, false, false, false, false, true, 50, 0, " ") };
 	loading_Screen("Flying through space");
 	intermittent_Text();
 	combat(players_Ship, players_Artillery, players_Inventory, 1, enemy_Ship3, enemys_Artillery);
@@ -1843,6 +2066,8 @@ int main() {
 	 enemys_Artillery = {
 	artillery("Void Ripper", 10, 80, 70, 40, 5, false, false, true, false, false, 50, 0, " "),
 	artillery("Howitzer", 30, 70, 20, 2, 20, false, false, false, false, false, 0, 0, " ") };
+	 loading_Screen("Flying through space");
+	 intermittent_Text();
 	combat(players_Ship, players_Artillery, players_Inventory, 2, enemy_Ship5, enemys_Artillery);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
@@ -1850,125 +2075,162 @@ int main() {
 	//fight 2, level 2
 	ship enemy_Ship6("Scourge", 45, 35, 35, 15);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 100, 100, 40, 5, false, false, false, false, false, 0, 0, " "),
-	artillery("Corrosion Harpoon", 5, 85, 50, 1, 10, true, false, false, false, false, 80, 0, " ")};
+	artillery("Rift cannon", 10, 100, 100, 40, 5, false, false, false, false, false, 0, 0, " "),
+	artillery("Corrosion Harpoon", 5, 85, 50, 1, 1, true, false, false, false, false, 80, 0, " ")};
+	loading_Screen("Flying through space");
+	intermittent_Text();
 	combat(players_Ship, players_Artillery, players_Inventory, 2, enemy_Ship6, enemys_Artillery);
 	enemys_Artillery.clear();
-
+	loading_Screen("Looking for a place to sleep");
+	story_Part6();
 	//3
 	//fight 1, level 3
 	add_Artillery2(artillery_For_Purchase);
-	ship enemy_Ship7("Eclipse Marauder", 80, 65, 20, 5);
+	ship enemy_Ship7("Eclipse Marauder", 95, 65, 5, 5);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
+	artillery("Pulsewave breacher", 20, 75, 90, 10, 10, false, false, false, false, true, 20, 0, " "),
+	artillery("Hellfire cannon", 30, 60, 30, 5, 30, false, false, false, true, false, 40, 0, " ") };
+	loading_Screen("Flying through space");
+	intermittent_Text();
 	combat(players_Ship, players_Artillery, players_Inventory, 2, enemy_Ship7, enemys_Artillery);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
 
 	//fight 2, level 3
-	ship enemy_Ship8("Tempest", 20, 40, 45, 25);
+	ship enemy_Ship8("Tempest", 40, 40, 45, 35);
 	 enemys_Artillery = {
 	artillery("Ion Beam Cannon", 50, 35, 100, 7, 20, false, false, false, true, false, 50, 0, " "),
-	artillery("EMP Burst", 5, 100, 90, 1, 20, false, true, false, false, false,0, 0, " ") };
+	artillery("EMP Burst", 5, 100, 90, 1, 20, false, true, false, false, false, 50, 0, " ") };
+	loading_Screen("Flying through space");
+	intermittent_Text();
 	combat(players_Ship, players_Artillery, players_Inventory, 3, enemy_Ship8, enemys_Artillery);
 	enemys_Artillery.clear();
 
 	//fight 3, level 3
-	ship enemy_Ship9("Space Vulture", 35, 20, 15, 25);
+	ship enemy_Ship9("Space Vulture", 70, 70, 25, 25);
 	 enemys_Artillery = {
 	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
 	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
+	loading_Screen("Flying through space");
+	intermittent_Text();
 	combat(players_Ship, players_Artillery, players_Inventory, 3, enemy_Ship9, enemys_Artillery);
 	enemys_Artillery.clear();
-
+	
 	//4
 	//fight 1, level 4
-	ship enemy_Ship10("Nightmare", 35, 20, 15, 25);
+	ship enemy_Ship10("Starborn Menace", 110, 55, 25, 30);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
+	artillery("Zeus Howitzer", 25, 115, 70, 10, 20, false, false, false, true, false, 20, 0, " "),
+	artillery("Vortex Cannon", 15, 70, 70, 5, 5, false, true, false, false, false, 35, 0, " ") };
+	loading_Screen("Flying through space");
+	intermittent_Text();
 	combat(players_Ship, players_Artillery, players_Inventory, 4, enemy_Ship10, enemys_Artillery);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
-
+	
+	
 	//fight 2, level 4
-	ship enemy_Ship11("Star Hunters", 35, 20, 15, 25);
+	ship enemy_Ship11("Star Hunter", 70, 90, 70, 50);
 	 enemys_Artillery = {
 	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
+	artillery("Rust Reaper", 20, 30, 30, 3, 10, true, false, false, false, false, 80, 0, " "),
+	artillery("Star Breaker", 65, 55, 40, 10, 35, false, false, false, true, false, 75, 0, " ") };
+	loading_Screen("Flying through space");
+	intermittent_Text();
 	combat(players_Ship, players_Artillery, players_Inventory, 4, enemy_Ship11, enemys_Artillery);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
 
 	//fight 3, level 4
-	ship enemy_Ship12("Shadow Dread", 35, 20, 15, 25);
+	ship enemy_Ship12("Nightmare", 95, 55, 40, 15);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
+	artillery("Veil Cannon", 10, 100, 20, 10, 1, false, false, false, true, false, 50, 0, " "),
+	artillery("Night's Wrath", 30, 90, 60, 2, 20, false, false, true, false, true, 50, 0, " "),
+	artillery("Talon", 20, 60, 60, 10, 10, false, true, false, false, false, 30, 0, " ") };
+	loading_Screen("Flying through space");
+	intermittent_Text();
 	combat(players_Ship, players_Artillery, players_Inventory, 4, enemy_Ship12, enemys_Artillery);
 	enemys_Artillery.clear();
-	
+	story_Part7();
 	//5
+	
 	//fight 1, level 5
-	add_Artillery3(artillery_For_Purchase);
-	ship enemy_Ship13("Raptor", 35, 20, 15, 25);
-	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
-	combat(players_Ship, players_Artillery, players_Inventory, 5, enemy_Ship13, enemys_Artillery);
-	enemys_Artillery.clear();
-
-	//fight 2, level 5
-	ship enemy_Ship14("Galactic Prowler", 35, 20, 15, 25);
-	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
+	ship enemy_Ship14("UCA Prowler", 90, 30, 95, 115);
+	enemys_Artillery = {
+   artillery("Phantom railgun", 45, 80, 30, 5, 20, false, false, false, true, false, 20, 0, " "),
+   artillery("Talon", 20, 60, 60, 10, 10, false, true, true, false, false, 30, 0, " ") };
+	loading_Screen("Flying through space");
+	intermittent_Text();
 	combat(players_Ship, players_Artillery, players_Inventory, 5, enemy_Ship14, enemys_Artillery);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
+	story_Part8();
+
+	//fight 2, level 5
+	add_Artillery3(artillery_For_Purchase);
+	ship enemy_Ship13("Void stalker", 140, 100, 50, 5);
+	 enemys_Artillery = {
+	artillery("Void Piercer", 20, 85, 95, 5, 15, false, false, true, false, false, 65, 0, ""),
+	artillery("Void Cleaver", 60, 60, 30, 5, 30, false, false, false, true, false, 35, 0, "") };
+	loading_Screen("Flying through space");
+	intermittent_Text();
+	combat(players_Ship, players_Artillery, players_Inventory, 5, enemy_Ship13, enemys_Artillery);
+	enemys_Artillery.clear();
 
 	//fight 3, level 5
-	ship enemy_Ship15("Starborn menace", 35, 20, 15, 25);
-	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
+	ship enemy_Ship15("Shadow Dread", 170, 60, 75, 50);
+	enemys_Artillery = {
+   artillery("Reaper Cannon", 10, 80, 70, 5, 10, false, false, true, false, false, 70, 0, " "),
+   artillery("Nightfall Howitzer", 50, 120, 50, 3, 20, false, false, false, true, false, 100, 0, " "),
+   artillery("Wrathfire", 20, 60, 70, 5, 10, true, false, false, false, false, 50, 0, " ") };
+	loading_Screen("Flying through space");
+	intermittent_Text();
 	combat(players_Ship, players_Artillery, players_Inventory, 5, enemy_Ship15, enemys_Artillery);
 	enemys_Artillery.clear();
+	story_Part9();
+	
+
+	
 
 	//6
 	//fight 1, level 6
-	ship enemy_Ship16("Celestial predator", 35, 20, 15, 25);
+	ship enemy_Ship16("UCA Predator", 180, 140, 35, 15);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
+	artillery("Mauler", 20, 60, 30, 1, 20, false, false, false, false, false, 0, 0, " "), 
+	 artillery("Talon MK2", 25, 75, 60, 10, 10, false, true, true, false, false, 45, 0, " "),
+	artillery("Beast Maw", 20, 60, 30, 1, 20, false, false, false, false, false, 0, 0, " ") };
+	loading_Screen("Flying through space");
+	intermittent_Text();
 	combat(players_Ship, players_Artillery, players_Inventory, 6, enemy_Ship16, enemys_Artillery);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
 
 	//fight 2 level 6
-	ship enemy_Ship17("Dreadnought", 35, 20, 15, 25);
+	ship enemy_Ship17("UCA Dreadnought", 300, 100, 10, 30);
 	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
+	artillery("Dread Breaker", 15, 100, 70, 3, 5, false, false, false, false, true, 70, 0, " "),
+	artillery("Titan Cannon", 30, 50, 100, 25, 15, false, false, false, false, false, 0, 0, " ") };
+	loading_Screen("Flying through space");
+	intermittent_Text();
 	combat(players_Ship, players_Artillery, players_Inventory, 6, enemy_Ship17, enemys_Artillery);
 	enemys_Artillery.clear();
-
-	//fight 3, level 6
-	ship enemy_Ship18("Void Stalker", 35, 20, 15, 25);
-	 enemys_Artillery = {
-	artillery("Ion Pulse Blaster", 10, 80, 70, 40, 5, false, false, false, false, false, 0, 0, " "),
-	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, false, false,0, 0, " ") };
-	combat(players_Ship, players_Artillery, players_Inventory, 6, enemy_Ship18, enemys_Artillery);
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
+		
+	//fight 3, level 6
+	ship enemy_Ship18("UCA Raptor", 100, 60, 120, 140);
+	 enemys_Artillery = {
+	artillery("Claw Howitzer", 15, 80, 70, 3, 10, false, false, false, false, true, 40, 0, " "),
+	artillery("Hawkeye Rail Gun", 50, 100, 100, 3, 10, false, false, false, true, false, 50, 0, " "),
+	artillery("Talon MK3", 30, 85, 90, 3, 10, false, true, true, true, false, 50, 0, " "),
+	artillery("Venom spitter", 10, 80, 40, 3, 5, true, false, false, false, false, 30, 0, " ") };
+	loading_Screen("Flying through space");
+	intermittent_Text();
+	combat(players_Ship, players_Artillery, players_Inventory, 6, enemy_Ship18, enemys_Artillery);
 	enemys_Artillery.clear();
-	
-	//artillery(ship & players_Ship, string name, int damage, int accuracy, int attack_Speed, int max_Uses, int energy_Cost, bool is_EMP, bool is_Pulse_Disruptor, bool is_Plasma_Overload);
-	//combat(players_Ship, players_Artillery, players_Inventory, 1, enemy_Ship1, enemys_Artillery);
-	
-	
-	
-	//starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
+	story_Part12();
+	system("cls");
+	the_End();
+
 
 	return 0;
 }
