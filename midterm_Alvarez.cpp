@@ -513,9 +513,9 @@ void status_Codex() {
 	cout << "STATUS CODEX" << endl;
 	cout << "----------------------" << endl;
 	cout << "Corrosion: deals damage over time, dealing more each turn, to cure corrosive purchase a repair from a starship depot" << endl;
-	cout << "Weaken: decreases the target's defense by 50% for 1-2 turn" << endl;
+	cout << "Weaken: decreases the target's defense by 50% for 1 - 2 turns" << endl;
 	cout << "Stun: disables the target's ability to act for a turn, 70% chance it goes away the subsequent turn" << endl;
-	cout << "Overheat: disables the overheated artillery for 1-2 turns" << endl;
+	cout << "Overheat: disables the overheated artillery for 1 - 2 turns" << endl;
 	cout << "Disrupted: disables energy regeneration for 3 - 5 turns" << endl;
 	cout << "----------------------" << endl;
 	cout << "Enter any number to return to combat: " << endl;
@@ -543,19 +543,27 @@ void print_Stats(ship players_Ship, ship enemy_Ship, vector<artillery>& players_
 	print_Num_Spaces(player_Name_Length);
 	cout << "STATUS EFFECTS:\t\t\t" << "ENEMY STATUS EFFECTS:" << endl;
 	cout << "Health: " << players_Ship.get_Current_Health() << "/" << players_Ship.get_Max_Health();
-	if (players_Ship.get_Current_Energy() >= 10) {
-		print_Num_Spaces(29);
+	print_Num_Spaces(27);
+	if (players_Ship.get_Current_Health() < 100) {
+		print_Num_Spaces(1);
 	}
 	else {
-		print_Num_Spaces(30);
+		print_Num_Spaces(2);
+	}
+	if (players_Ship.get_Max_Health() < 100) {
+		print_Num_Spaces(1);
 	}
 	cout << "---------------------\t\t\t---------------------" << endl;
 	cout << "Energy: " << players_Ship.get_Current_Energy() << "/" << players_Ship.get_Max_Energy();
-	if (players_Ship.get_Current_Energy() >= 10) {
-		print_Num_Spaces(29);
+	print_Num_Spaces(27);
+	if (players_Ship.get_Current_Energy() < 10) {
+		print_Num_Spaces(1);
 	}
 	else {
-		print_Num_Spaces(30);
+		print_Num_Spaces(2);
+	}
+	if (players_Ship.get_Max_Energy() < 10) {
+		print_Num_Spaces(1);
 	}
 	print_Current_Statuses(players_Ship, enemy_Ship, players_Artillery, enemys_Artillery, 1);
 	cout << "--------------------";
@@ -565,19 +573,26 @@ void print_Stats(ship players_Ship, ship enemy_Ship, vector<artillery>& players_
 	print_Num_Spaces(enemy_Name_Length);
 	print_Current_Statuses(players_Ship, enemy_Ship, players_Artillery, enemys_Artillery, 3);
 	cout << "Health: " << enemy_Ship.get_Current_Health() << "/" << enemy_Ship.get_Max_Health();
-	if (players_Ship.get_Current_Energy() >= 10) {
-		print_Num_Spaces(29);
+	if (enemy_Ship.get_Current_Health() < 10) {
+		print_Num_Spaces(1);
 	}
 	else {
-		print_Num_Spaces(30);
+		print_Num_Spaces(2);
+	}
+	if (enemy_Ship.get_Max_Health() < 10) {
+		print_Num_Spaces(1);
 	}
 	print_Current_Statuses(players_Ship, enemy_Ship, players_Artillery, enemys_Artillery, 4);
 	cout << "Energy: " << enemy_Ship.get_Current_Energy() << "/" << enemy_Ship.get_Max_Energy();
-	if (players_Ship.get_Current_Energy() >= 10) {
-		print_Num_Spaces(29);
+	print_Num_Spaces(27);
+	if (enemy_Ship.get_Current_Energy() < 10) {
+		print_Num_Spaces(1);
 	}
 	else {
-		print_Num_Spaces(30);
+		print_Num_Spaces(2);
+	}
+	if (enemy_Ship.get_Max_Energy() < 10) {
+		print_Num_Spaces(1);
 	}
 	print_Current_Statuses(players_Ship, enemy_Ship, players_Artillery, enemys_Artillery, 5);
 	cout << "--------------------                      ---------------------                 ---------------------" << endl;
@@ -1477,7 +1492,7 @@ int ammo_Options(vector<artillery>& players_Artillery, int player_Inventory[]) {
 	return player_Choice;
 }
 
-int starship_Depot(ship players_Ship, vector<artillery>& players_Artillery, vector<artillery>& artillery_For_Purchase, int player_Inventory[]) {
+int starship_Depot(ship& players_Ship, vector<artillery>& players_Artillery, vector<artillery>& artillery_For_Purchase, int player_Inventory[]) {
 	bool done = false;
 	cout << "Guided in by automated systems, your ship settled onto the docking bay with a heavy clang. " 
 	<< endl << "Mechanics and repair arms spring into action, a crew member giving you a quick nod before assessing the damage." << endl;
@@ -1683,8 +1698,8 @@ void story_Part2() {
 }
 
 void loading_Screen(string text) {
-	int secs = random_Number(2, 6);
-	for (int i = 0; i < secs; i++){
+	int length = random_Number(2, 6);
+	for (int i = 0; i < length; i++){
 		cout << "\r" << text << "      ";
 		this_thread::sleep_for(chrono::seconds(1));
 		cout << "\r" << text << " .    ";
@@ -1955,9 +1970,9 @@ void demo() {
 	// name, damage, accuracy, attack_Speed, max_Uses, energy_Cost, is_EMP, is_Pulse_Disruptor, is_Plasma_Overload);
 	*/
 
-	//story_Part1();
+	
 	string user_Name = pick_Name();
-	//story_Part2();
+	
 
 	ship players_Ship(user_Name, 50, 50, 10, 10);
 	//name , health, energy, evasiveness, energy regen
@@ -1979,13 +1994,11 @@ void demo() {
 	artillery("Basic Rail Gun", 20, 60, 30, 1, 20, false, false, false, true, false, 0, 0, " ") };
 
 	combat(players_Ship, players_Artillery, players_Inventory, 1, enemy_Ship1, enemys_Artillery);
-	//story_Part3(players_Inventory);
-
 	
 	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
 
-	ship enemy_Ship12("Nightmare", 95, 55, 40, 15);
+	ship enemy_Ship12("Nightmare", 155, 55, 40, 15);
 	enemys_Artillery = {
    artillery("Veil Cannon", 10, 100, 20, 10, 1, false, false, false, true, false, 50, 0, " "),
    artillery("Night's Wrath", 30, 90, 60, 2, 20, false, false, true, false, true, 50, 0, " "),
@@ -2142,7 +2155,7 @@ int main() {
 	enemys_Artillery.clear();
 
 	//fight 3, level 4
-	ship enemy_Ship12("Nightmare", 95, 55, 40, 15);
+	ship enemy_Ship12("Nightmare", 155, 55, 40, 15);
 	 enemys_Artillery = {
 	artillery("Veil Cannon", 10, 100, 20, 10, 1, false, false, false, true, false, 50, 0, " "),
 	artillery("Night's Wrath", 30, 90, 60, 2, 20, false, false, true, false, true, 50, 0, " "),
