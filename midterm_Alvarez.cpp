@@ -1617,7 +1617,7 @@ void story_Part1() {
 void story_Part2() {
 	cout << "New Castra wasn't just a colony." << endl;
 	press_X_To_Continue();
-	cout << "It was a thriving, independent settlement—one that wanted no part of the Unified Celestial Alliance (UCA)." << endl;
+	cout << "It was a thriving, independent settlement, one that wanted no part of the Unified Celestial Alliance (UCA)." << endl;
 	press_X_To_Continue();
 	cout << "But in recent years, pirate factions have become unusually bold and well armed," << endl
 		<< "attacking vital colonies like New Castra with ruthless precision." << endl;
@@ -1714,7 +1714,7 @@ void story_Part3(int players_Inventory[]) {
 	cout << "The last sparks of the pirate ship faded behind you, and your battered vessel rattled, " 
 	<< endl << "systems flashing warnings of low fuel and hull breaches. " << endl;
 	press_X_To_Continue();
-	cout << "After what felt like hours, a flicker of light appeared in the distance—a starship depot. " << endl << "Relief washes over you." << endl;
+	cout << "After what felt like hours, a flicker of light appeared in the distance, a starship depot. " << endl << "Relief washes over you." << endl;
 	press_X_To_Continue_And_Clear();
 	cout << "You search your ship for any forgotten materials that could be used for trading, and you find some debris in a secluded corner of the ship" << endl;
 	int items[4] = { 5, 0, 0, 0 };
@@ -1739,15 +1739,15 @@ void story_Part5() {
 	press_X_To_Continue();
 	cout << "Driven by curiosity and suspicion, you lower your ship down, following the wreckage to investigate." << endl;
 	press_X_To_Continue();
-	cout << "The planet’s surface is harsh and dusty, winds kicking up small clouds as you land near the crash site." << endl;
+	cout << "The planet's surface is harsh and dusty, winds kicking up small clouds as you land near the crash site." << endl;
 	press_X_To_Continue();
 	cout << "The pirate vessel lies scattered, debris scattered across a wide radius. " << 
 		endl << "You walk through the wreckage carefully stepping over shredded metal and destroyed consoles." << endl;
 	press_X_To_Continue();
 	cout << "Among the wreckage, your eyes catch something peculiar, the gear the pirates left behind is marked with a familiar emblem, " << 
-		endl << "a symbol of the UCA.Weapons, armor, even the insignia on certain pieces, all unmistakably standard issue UCA." << endl;
+		endl << "a symbol of the UCA. Weapons, armor, even the insignia on certain pieces, all unmistakably standard issue UCA." << endl;
 	press_X_To_Continue_And_Clear();
-	cout << "A chill runs down your spine. Pirates like these shouldn’t have access to UCA grade gear." << 
+	cout << "A chill runs down your spine. Pirates like these shouldn't have access to UCA grade gear." << 
 		endl <<	"A thought begins to form." << endl;
 	press_X_To_Continue();
 	cout << "Had these pirates managed to steal from the UCA? " << endl;
