@@ -13,6 +13,14 @@ using namespace std;
 #include "ship.h"
 
 
+
+
+
+
+
+
+
+
 bool player_Corrosion;
 bool player_Weakened;
 bool player_Stunned;
@@ -132,12 +140,12 @@ void print_Dropped_Items(string text, int items[]) {
 void drop_Items(int level, int players_Inventory[]) {
 	int rarity = random_Number(1, 9 + level);
 	int length = random_Number(1, 1 + (level/2));
-	int additional_Loot = random_Number(1, level * 1.5);
+	int additional_Loot = random_Number(1, level * 3);
 	int dropped_Items[4] = {0, 0, 0, 0};
 	for (int i = 0; i < length; i++){
 		if (rarity <= 8) {
 			//drops common item
-			dropped_Items[0] += random_Number(3, 5 + additional_Loot);
+			dropped_Items[0] += random_Number(5, 5 + additional_Loot);
 			
 		}
 		else if (rarity <= 10) {
@@ -1077,10 +1085,10 @@ void add_Artillery1(vector<artillery>& artillery_Vector) {
 }
 void add_Artillery2(vector<artillery>& artillery_Vector) {
 	
-	artillery_Vector.push_back(artillery("Graviton Corroder", 40, 75, 35, 10, 20, true, false, false, false, false, 30, 1, "30% to corrosion"));
+	artillery_Vector.push_back(artillery("Graviton Corroder", 40, 75, 30, 15, 20, true, false, false, false, false, 30, 1, "30% to corrosion"));
 }
 void add_Artillery3(vector<artillery>& artillery_Vector) {
-	artillery_Vector.push_back(artillery("Void Piercer", 20, 85, 95, 10, 15, false, false, true, false, false, 65, 2, "65% to weaken"));
+	artillery_Vector.push_back(artillery("Void Piercer", 20, 115, 95, 10, 15, false, false, true, false, false, 65, 2, "65% to weaken"));
 }
 void add_Artillery4(vector<artillery>& artillery_Vector) {
 	artillery_Vector.push_back(artillery("Energy Ripper", 65, 75, 15, 5, 35, false, false, false, false, true , 35, 3, "35% to disrupt"));
@@ -1202,7 +1210,7 @@ int ship::upgrade_Options(int player_Inventory[]) {
 	cout << "0. BACK" << endl;
 	cout << "1. Hull:";
 	if (get_Hull_Level() < 5) {
-		cout << " Improves the ship's health by 15"  << endl;
+		cout << " Improves the ship's health by 25"  << endl;
 		price = generate_Upgade_Price(get_Hull_Level(), price);
 		display_Price(price);
 		wipe_Price(price);
@@ -1212,7 +1220,7 @@ int ship::upgrade_Options(int player_Inventory[]) {
 	}
 	cout << "2. Engines:";
 	if (get_Engines_Level() < 5) {
-		cout << " Increases the ship's evasiveness by 5%" << endl;
+		cout << " Increases the ship's evasiveness by 10%" << endl;
 		price = generate_Upgade_Price(get_Engines_Level(), price);
 		display_Price(price);
 		wipe_Price(price);
@@ -1222,7 +1230,7 @@ int ship::upgrade_Options(int player_Inventory[]) {
 	}
 	cout << "3. Ammo reserves:";
 	if (get_Ammo_Reserves_Level() < 5) {
-		cout << " Improves the ammo capacity of all your artillery by 10%" << endl;
+		cout << " Improves the ammo capacity of all your artillery by 20%" << endl;
 		price = generate_Upgade_Price(get_Ammo_Reserves_Level(), price);
 		display_Price(price);
 		wipe_Price(price);
@@ -1232,7 +1240,7 @@ int ship::upgrade_Options(int player_Inventory[]) {
 	}
 	cout << "4. Power core:";
 	if (get_Power_Core_Level() < 5) {
-		cout << " Increases the ship's energy capacity by 10" << endl;
+		cout << " Increases the ship's energy capacity by 20" << endl;
 		
 		price = generate_Upgade_Price(get_Power_Core_Level(), price);
 		display_Price(price);
@@ -1243,7 +1251,7 @@ int ship::upgrade_Options(int player_Inventory[]) {
 	}
 	cout << "5. Nuclear reactor:";
 	if (get_Nuclear_Reactor_Level() < 5) {
-		cout << " Improves the ship's energy regeneration by 5%" << endl;
+		cout << " Improves the ship's energy regeneration by 10%" << endl;
 		
 		price = generate_Upgade_Price(get_Nuclear_Reactor_Level(), price);
 		display_Price(price);
@@ -1492,6 +1500,7 @@ int ammo_Options(vector<artillery>& players_Artillery, int player_Inventory[]) {
 	return player_Choice;
 }
 
+//star ship depot
 int starship_Depot(ship& players_Ship, vector<artillery>& players_Artillery, vector<artillery>& artillery_For_Purchase, int player_Inventory[]) {
 	bool done = false;
 	cout << "Guided in by automated systems, your ship settled onto the docking bay with a heavy clang. " 
@@ -1515,24 +1524,24 @@ int starship_Depot(ship& players_Ship, vector<artillery>& players_Artillery, vec
 			while (upgrade_Option > 0) {
 				if (upgrade_Option == 1) {
 					players_Ship.set_Hull_Level(players_Ship.get_Hull_Level() + 1);
-					players_Ship.set_Max_Health(players_Ship.get_Max_Health() + 15);
+					players_Ship.set_Max_Health(players_Ship.get_Max_Health() + 25);
 					for (int i = 0; i < 15 && players_Ship.get_Current_Health() < players_Ship.get_Max_Health(); i++) {
 						players_Ship.set_Current_Health(players_Ship.get_Current_Health() + 1);
 					}
-					cout << "Your health was increased by 15!" << endl;
+					cout << "Your health was increased by 25!" << endl;
 					press_X_To_Continue_And_Clear();
 					
 				}
 				else if (upgrade_Option == 2) {
 					players_Ship.set_Engines_Level(players_Ship.get_Engines_Level() + 1);
-					players_Ship.set_Evasiveness(players_Ship.get_Evasiveness() + 5);
-					cout << "Your evasiveness was increased by +5%" << endl;
+					players_Ship.set_Evasiveness(players_Ship.get_Evasiveness() + 10);
+					cout << "Your evasiveness was increased by +10%" << endl;
 					press_X_To_Continue_And_Clear();
 				}
 				else if (upgrade_Option == 3) {
 					players_Ship.set_Ammo_Reserves_Level(players_Ship.get_Ammo_Reserves_Level() + 1);
 					for (int i = 0; i < players_Artillery.size(); i++) {
-						double increase = players_Artillery[i].get_Max_Uses() * .1;
+						double increase = players_Artillery[i].get_Max_Uses() * .2;
 						if (increase < 1) {
 							increase = 1;
 						}
@@ -1551,8 +1560,8 @@ int starship_Depot(ship& players_Ship, vector<artillery>& players_Artillery, vec
 						filled = false;
 					}
 					players_Ship.set_Power_Core_Level(players_Ship.get_Power_Core_Level() + 1);
-					players_Ship.set_Max_Energy(players_Ship.get_Max_Energy() + 10);
-					cout << "Your energy capacity was increased by 10!" << endl;
+					players_Ship.set_Max_Energy(players_Ship.get_Max_Energy() + 20);
+					cout << "Your energy capacity was increased by 20!" << endl;
 					if (!filled) {
 						cout << "We also topped off your energy for you! You're good to go" << endl;
 					}
@@ -1560,8 +1569,8 @@ int starship_Depot(ship& players_Ship, vector<artillery>& players_Artillery, vec
 				}
 				else if (upgrade_Option == 5) {
 					players_Ship.set_Nuclear_Reactor_Level(players_Ship.get_Nuclear_Reactor_Level() + 1);
-					players_Ship.set_Energy_Regen(players_Ship.get_Energy_Regen() + 5);
-					cout << "Your energy regeneration was increased by +5%" << endl;
+					players_Ship.set_Energy_Regen(players_Ship.get_Energy_Regen() + 10);
+					cout << "Your energy regeneration was increased by +10%" << endl;
 					press_X_To_Continue_And_Clear();
 				}
 				upgrade_Option = players_Ship.upgrade_Options(player_Inventory);
@@ -1619,6 +1628,7 @@ string pick_Name() {
 }
 
 void story_Part1() {
+	//  (OpenAI, 2024)
 	cout << "The dim lights of your cockpit flicker, a harsh reminder of your ship's fragility." << endl;
 	press_X_To_Continue();
 	cout << "Once, you might have scoffed at flying in such a patched-up vessel, but after the raid," << endl;
@@ -1630,6 +1640,7 @@ void story_Part1() {
 	press_X_To_Continue();
 }
 void story_Part2() {
+	//  (OpenAI, 2024)
 	cout << "New Castra wasn't just a colony." << endl;
 	press_X_To_Continue();
 	cout << "It was a thriving, independent settlement, one that wanted no part of the Unified Celestial Alliance (UCA)." << endl;
@@ -1726,16 +1737,18 @@ void intermittent_Text() {
 	press_X_To_Continue_And_Clear();
 }
 void story_Part3(int players_Inventory[]) {
+	//  (OpenAI, 2024)
 	cout << "The last sparks of the pirate ship faded behind you, and your battered vessel rattled, " 
 	<< endl << "systems flashing warnings of low fuel and hull breaches. " << endl;
 	press_X_To_Continue();
 	cout << "After what felt like hours, a flicker of light appeared in the distance, a starship depot. " << endl << "Relief washes over you." << endl;
 	press_X_To_Continue_And_Clear();
 	cout << "You search your ship for any forgotten materials that could be used for trading, and you find some debris in a secluded corner of the ship" << endl;
-	int items[4] = { 5, 0, 0, 0 };
+	int items[4] = { 10, 0, 0, 0 };
 	give_Item(players_Inventory, items);
 }
 void story_Part4() {
+	//  (OpenAI, 2024)
 	cout << "You leave Starship depot, the emptiness of space stretching ahead." << endl;
 	press_X_To_Continue();
 	cout << "Hours pass along a trade route, sensors quiet, until a blip appears on your radar." << endl;
@@ -1749,6 +1762,7 @@ void story_Part4() {
 
 }
 void story_Part5() {
+	//  (OpenAI, 2024)
 	cout << "The pirate ship bursts into flames, spiraling out of control as it crashes onto a barren planet below. " << 
 		endl << "A plume of smoke marking its impact site on the surface. " << endl;
 	press_X_To_Continue();
@@ -1779,6 +1793,7 @@ void story_Part5() {
 	press_X_To_Continue_And_Clear();
 }
 void story_Part6() {
+	//  (OpenAI, 2024)
 	cout << "You bring your ship down on a dusty, isolated colony planet, weary from the recent battles. " << endl;
 	press_X_To_Continue();
 	cout << "As you dock in a makeshift landing bay, the hum of life and chatter fills the air, a relief after the empty void of space." << endl;
@@ -1825,6 +1840,7 @@ void story_Part6() {
 	press_X_To_Continue();
 }
 void story_Part7() {
+	//  (OpenAI, 2024)
 	cout << "After defeating the last pirate ship in the sector, your comms light up with a scrambled message. " << 
 		endl << "You piece together what you can from the encrypted signal, and a series of phrases become clear: " << endl;
 	press_X_To_Continue();
@@ -1869,6 +1885,7 @@ void story_Part7() {
 		
  }
 void story_Part9() {
+	//  (OpenAI, 2024)
 	cout << "Shaken by what you just witnessed, you set a course to the nearest planet, desperate to put distance between yourself and the UCA's dark dealings." << 
 		endl <<" Your mind spins with questions, but exhaustion weighs on you, and you land in a small, quiet colony on the planet's surface." << endl;
 	press_X_To_Continue();
@@ -1899,6 +1916,7 @@ void story_Part9() {
 
 }
 void story_Part8() {
+	//  (OpenAI, 2024)
 	cout << "You gun the engines, pushing your ship to its limits as you pursue the fleeing pirate vessels." << endl;
 	press_X_To_Continue();
 	cout << "It darts through asteroid fields and around shattered moon fragments, but you stay on its tail, your targeting systems locking in." << endl;
@@ -1906,6 +1924,7 @@ void story_Part8() {
 	
 }
 void story_Part10() {
+	//  (OpenAI, 2024)
 	cout << "Fueled by everything you've witnessed, you set a course straight for UCA territory, intent on making them answer for their treachery." <<
 			endl << " You navigate through their patrols undetected, inching closer to the UCA capital with every lightyear." << endl;
 	press_X_To_Continue();
@@ -1919,6 +1938,7 @@ void story_Part10() {
 	press_X_To_Continue_And_Clear();
 }
 void story_Part11() {
+	//  (OpenAI, 2024)
 	cout << "Determined to inflict as much  destruction as you can to the heart of the UCA, you engage full thrusters and dive toward the nearest patrols." << endl;
 	press_X_To_Continue();
 	cout << "Your weapons hum to life as you open fire on nearby ships" << endl;
@@ -1927,6 +1947,7 @@ void story_Part11() {
 
 }
 void story_Part12() {
+	//  (OpenAI, 2024)
 	cout << "After tearing through the last of the UCA ships, you dock near the heart of their headquarters, determined to get answers." << endl;
 	press_X_To_Continue();
 	cout << "Moving stealthily, you slip past guards and security checkpoints until you reach an imposing door." << endl;
@@ -2012,6 +2033,13 @@ void demo() {
 
 
 int main() {
+
+	// citations:
+	// OpenAI. (2024). ChatGPT (nov 2nd version) [Large language model]. https://chat.openai.com/share/dccb3610-1db9-4eed-88b1-cdb06f67982a
+
+
+
+
 	int players_Inventory[4] = {0, 0, 0, 0};
 	vector<artillery> artillery_For_Purchase;
 	/*
@@ -2023,10 +2051,10 @@ int main() {
 	string user_Name = pick_Name();
 	story_Part2();
 
-	ship players_Ship(user_Name, 50, 50, 10, 10);
+	ship players_Ship(user_Name, 100, 50, 10, 10);
 	//name , health, energy, evasiveness, energy regen
 	vector<artillery> players_Artillery = {
-	artillery( "Basic Artillery", 15, 95, 60, 30, 5, false, false, false, true, false, 10, 0, "10% to overheat") };
+	artillery( "Basic Artillery", 15, 95, 60, 40, 5, false, false, false, true, false, 10, 0, "10% to overheat") };
 	// artillery(string name, int damage, int accuracy, int attack_Speed, int max_Uses, int energy_Cost, bool can_Corrode, bool can_Stun, bool can_Weaken, bool can_Overheat, bool can_Disrupt, int percent, int ammo_Quality, string ability_Name);
 	
 	
@@ -2052,7 +2080,7 @@ int main() {
 	enemys_Artillery.clear();
 
 	//fight 3, level 1
-	ship enemy_Ship3("Scavenger", 85, 30, 5, 65);
+	ship enemy_Ship3("Scavenger", 80, 30, 0, 65);
 	enemys_Artillery = {
 	artillery("Phase disruptor", 15, 90, 70, 10, 10, false, false, false, false, true, 50, 0, " ") };
 	loading_Screen("Flying through space");
@@ -2072,7 +2100,10 @@ int main() {
 	loading_Screen("Flying through space");
 	intermittent_Text();
 	combat(players_Ship, players_Artillery, players_Inventory, 2, enemy_Ship4, enemys_Artillery);
+	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	enemys_Artillery.clear();
+
+
 
 	//fight 2, level 2
 	ship enemy_Ship5("Starbane Raider", 55, 25, 55, 100);
@@ -2094,6 +2125,7 @@ int main() {
 	intermittent_Text();
 	combat(players_Ship, players_Artillery, players_Inventory, 2, enemy_Ship6, enemys_Artillery);
 	enemys_Artillery.clear();
+	starship_Depot(players_Ship, players_Artillery, artillery_For_Purchase, players_Inventory);
 	loading_Screen("Looking for a place to sleep");
 	story_Part6();
 	//3
