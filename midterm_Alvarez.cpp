@@ -549,30 +549,47 @@ void print_Stats(ship players_Ship, ship enemy_Ship, vector<artillery>& players_
 	//int enemy_Name_Length = 30 - enemy_Ship.get_Name().length();
 	cout << "The " << players_Ship.get_Name() << "'s stats";
 	print_Num_Spaces(player_Name_Length);
-	cout << "STATUS EFFECTS:\t\t\t" << "ENEMY STATUS EFFECTS:" << endl;
+	cout << "STATUS EFFECTS:";
+	print_Num_Spaces(23);
+	cout << "ENEMY STATUS EFFECTS:" << endl;
 	cout << "Health: " << players_Ship.get_Current_Health() << "/" << players_Ship.get_Max_Health();
 	print_Num_Spaces(27);
-	if (players_Ship.get_Current_Health() < 100) {
-		print_Num_Spaces(1);
-	}
-	else {
+	
+	if (players_Ship.get_Current_Health() < 10) {
 		print_Num_Spaces(2);
 	}
-	if (players_Ship.get_Max_Health() < 100) {
+	else if (players_Ship.get_Current_Health() < 100) {
 		print_Num_Spaces(1);
 	}
-	cout << "---------------------\t\t\t---------------------" << endl;
+	
+	if (players_Ship.get_Max_Health() < 10) {
+		print_Num_Spaces(2);
+	}
+	else if (players_Ship.get_Max_Health() < 100) {
+		print_Num_Spaces(1);
+	}
+	
+	
+	cout << "---------------------";
+	print_Num_Spaces(17);
+	cout << "---------------------" << endl;
 	cout << "Energy: " << players_Ship.get_Current_Energy() << "/" << players_Ship.get_Max_Energy();
 	print_Num_Spaces(27);
+
 	if (players_Ship.get_Current_Energy() < 10) {
-		print_Num_Spaces(1);
-	}
-	else {
 		print_Num_Spaces(2);
 	}
-	if (players_Ship.get_Max_Energy() < 10) {
+	else if (players_Ship.get_Current_Energy() < 100) {
 		print_Num_Spaces(1);
 	}
+
+	if (players_Ship.get_Max_Energy() < 10) {
+		print_Num_Spaces(2);
+	}
+	else if (players_Ship.get_Max_Energy() < 100) {
+		print_Num_Spaces(1);
+	}
+
 	print_Current_Statuses(players_Ship, enemy_Ship, players_Artillery, enemys_Artillery, 1);
 	cout << "--------------------";
 	print_Num_Spaces(22);
@@ -581,26 +598,36 @@ void print_Stats(ship players_Ship, ship enemy_Ship, vector<artillery>& players_
 	print_Num_Spaces(enemy_Name_Length);
 	print_Current_Statuses(players_Ship, enemy_Ship, players_Artillery, enemys_Artillery, 3);
 	cout << "Health: " << enemy_Ship.get_Current_Health() << "/" << enemy_Ship.get_Max_Health();
-	if (enemy_Ship.get_Current_Health() < 10) {
+	if (enemy_Ship.get_Current_Health() < 100) {
 		print_Num_Spaces(1);
 	}
-	else {
+	else if (enemy_Ship.get_Current_Health() < 10) {
 		print_Num_Spaces(2);
 	}
-	if (enemy_Ship.get_Max_Health() < 10) {
+	
+	if (enemy_Ship.get_Max_Health() < 100) {
 		print_Num_Spaces(1);
 	}
+	else if (enemy_Ship.get_Max_Health() < 10) {
+		print_Num_Spaces(2);
+	}
+	
+	
 	print_Current_Statuses(players_Ship, enemy_Ship, players_Artillery, enemys_Artillery, 4);
 	cout << "Energy: " << enemy_Ship.get_Current_Energy() << "/" << enemy_Ship.get_Max_Energy();
 	print_Num_Spaces(27);
-	if (enemy_Ship.get_Current_Energy() < 10) {
+	if (enemy_Ship.get_Current_Energy() < 100) {
 		print_Num_Spaces(1);
 	}
-	else {
+	else if (enemy_Ship.get_Current_Energy() < 10) {
 		print_Num_Spaces(2);
 	}
-	if (enemy_Ship.get_Max_Energy() < 10) {
+
+	if (enemy_Ship.get_Max_Energy() < 100) {
 		print_Num_Spaces(1);
+	}
+	else if (enemy_Ship.get_Max_Energy() < 10) {
+		print_Num_Spaces(2);
 	}
 	print_Current_Statuses(players_Ship, enemy_Ship, players_Artillery, enemys_Artillery, 5);
 	cout << "--------------------                      ---------------------                 ---------------------" << endl;
@@ -953,6 +980,7 @@ void enemy_Action(int enemy_Choice, ship& players_Ship, ship& enemy_Ship, vector
 // players ship, players artillery, players inventory, enemy level, enemy ship, enemy's artillery
 int combat(ship& players_Ship, vector<artillery>& players_Artillery, int players_Inventory[], int enemy_Level, ship& enemy_Ship, vector<artillery>& enemys_Artillery) {
 	players_Ship.set_Current_Energy(players_Ship.get_Max_Energy());
+
 	while (enemy_Ship.get_Current_Health() > 0) {
 		if (players_Ship.get_Current_Health() > 0) {
 			bool player_Choice_Loop = false;
@@ -1394,7 +1422,7 @@ int ship::heal_Options(int player_Inventory[]) {
 	
 	}
 	else {
-		cout << "THE SHIP IS IN GREAT CONDITION, NO REEPAIRS NEEDED" << endl;
+		cout << "THE SHIP IS IN GREAT CONDITION, NO REPAIRS NEEDED" << endl;
 	}
 
 
@@ -2052,6 +2080,7 @@ int main() {
 	story_Part2();
 
 	ship players_Ship(user_Name, 100, 50, 10, 10);
+	
 	//name , health, energy, evasiveness, energy regen
 	vector<artillery> players_Artillery = {
 	artillery( "Basic Artillery", 15, 95, 60, 40, 5, false, false, false, true, false, 10, 0, "10% to overheat") };
@@ -2092,7 +2121,7 @@ int main() {
 
 	//2
 	//fight 1 level 2
-	add_Artillery1(artillery_For_Purchase);
+	add_Artillery2(artillery_For_Purchase);
 	ship enemy_Ship4("Enforcer", 70, 40, 5, 50);
 	 enemys_Artillery = {
 	artillery("Ion Pulse Blaster", 30, 10, 70, 5, 20, false, false, false, true, false, 20, 0, " ")};
@@ -2130,7 +2159,7 @@ int main() {
 	story_Part6();
 	//3
 	//fight 1, level 3
-	add_Artillery2(artillery_For_Purchase);
+	add_Artillery3(artillery_For_Purchase);
 	ship enemy_Ship7("Eclipse Marauder", 95, 65, 5, 5);
 	 enemys_Artillery = {
 	artillery("Pulsewave breacher", 20, 75, 90, 10, 10, false, false, false, false, true, 20, 0, " "),
@@ -2212,7 +2241,7 @@ int main() {
 	story_Part8();
 
 	//fight 2, level 5
-	add_Artillery3(artillery_For_Purchase);
+	add_Artillery4(artillery_For_Purchase);
 	ship enemy_Ship13("Void stalker", 140, 100, 50, 5);
 	 enemys_Artillery = {
 	artillery("Void Piercer", 20, 85, 95, 5, 15, false, false, true, false, false, 65, 0, ""),
